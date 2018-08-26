@@ -5,6 +5,13 @@ const path    = require('path');
 const config = require(path.join(__dirname, '.', 'config.js'));
 const wildapricot = require(path.join(__dirname, '.', 'wildapricot.js'));
 
+// configure logging
+var fs = require('fs');
+var logsDir = './logs';
+
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
+}
 const bunyan  = require('bunyan');
 const RotatingFileStream = require('bunyan-rotating-file-stream');
 var log = bunyan.createLogger({
