@@ -1,0 +1,20 @@
+{
+  "name": "databaseupdatenewbie",
+  "version": "1.0.0",
+  "description": "Update newbie field in SBNC database on WildApricot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roy Kiesler",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.1",
+    "bunyan": "^1.8.12",
+    "bunyan-rotating-file-stream": "^1.6.3",
+    "dotenv": "^6.0.0",
+    "lodash": "^4.17.10",
+    "node-rest-client": "^3.1.0",
+    "path": "^0.12.7"
+  }
+}
