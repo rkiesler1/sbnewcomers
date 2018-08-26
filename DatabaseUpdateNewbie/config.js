@@ -1,10 +1,17 @@
-var dotenv = require('dotenv');
+/*jshint esversion: 6 */
+const path    = require('path');
+const dotenv = require('dotenv');
 var cfg = {};
 
 if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-    dotenv.config({path: '.env'});
+    dotenv.config({
+        path: path.join(__dirname, '.', '.env')
+    });
 } else {
-    dotenv.config({path: '.env.test', silent: true});
+    dotenv.config({
+        path: path.join(__dirname, '.', '.env.test'),
+        silent: true
+    });
 }
 
 cfg.accountId = process.env.wildapricot_account_id;
