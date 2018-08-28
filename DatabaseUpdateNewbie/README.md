@@ -19,8 +19,10 @@ You __***must***__ have Administrator rights on WildApricot. Contact the [Techno
    ```
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
+   wildapricot_client_id=<sbniapi_client_id>
+   wildapricot_client_secret=<sbniapi_client_secret>
    ```
-   The `wildapricot_client_id, wildapricot_client_secret and wildapricot_account_id` values should not change, unless someone has modified or deleted the SBNCAPI authorized application (see the Settings >> Security >> Authorized applications option on WildApricot). If that does happen, create a new authorized application ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)) or contact the [Technology Committee](mailto:technology@sbnewcomers.org) for assistance.
+   The `wildapricot_account_id` value should not change. The `wildapricot_client_id` and `wildapricot_client_secret` values can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)). If you need assistance, contact the [Technology Committee](mailto:technology@sbnewcomers.org).
 
 3. Execute the following commands:
    ```bash
