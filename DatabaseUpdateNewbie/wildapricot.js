@@ -4,9 +4,12 @@
 
 const _      = require('lodash');
 const async  = require('async');
-const bunyan  = require('bunyan');
+const path   = require('path');
 const Client = require('node-rest-client').Client;
 
+// configure logging
+const bunyan = require('bunyan');
+const RotatingFileStream = require('bunyan-rotating-file-stream');
 var log = bunyan.createLogger({
     name: 'wildapricot',
     streams: [
@@ -15,10 +18,19 @@ var log = bunyan.createLogger({
             level: "debug"
         },
         {
-            path: './newbie_update.log'
+            stream: new RotatingFileStream({
+                path: path.join(__dirname, '.', 'logs/wild_apricot_client.log'),
+                period: '1d',          // daily rotation
+                totalFiles: 500,       // keep up to 500 back copies
+                rotateExisting: true,  // Give ourselves a clean file when we start up, based on period
+                threshold: '1m',       // Rotate log files larger than 1 megabyte
+                totalSize: '1g',       // Don't keep more than 1gb of archived log files
+                gzip: true             // Compress the archive log files to save space
+            }),
+            level: "debug"
         }
     ],
-    level : bunyan.DEBUG /* bunyan.INFO */
+    level : bunyan.DEBUG
 });
 
 var options         = {
