@@ -24,8 +24,8 @@ You __***must***__ have Administrator rights on WildApricot. Contact the [Techno
    ```
    The `wildapricot_account_id` value should not change. The `wildapricot_client_id` and `wildapricot_client_secret` values can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
 
-<table>
-<tr><td style="border: 1px solid; width: 600px;">
+<table style="border: 1px solid; width: 600px;">
+<tr><td>
 ![Authorized Application](/../screenshots/application.png?raw=true "Authorized Application")
 </td></tr>
 </table>
