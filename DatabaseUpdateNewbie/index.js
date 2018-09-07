@@ -1,5 +1,6 @@
 /*jshint esversion: 6 */
 const _       = require('lodash');
+const async   = require('async');
 const path    = require('path');
 const util    = require('util');
 
@@ -20,11 +21,11 @@ var log = bunyan.createLogger({
     streams: [
         {
             stream: process.stderr,
-            level: "debug"
+            level: 'debug'
         },
         {
             stream: new RotatingFileStream({
-                path: path.join(__dirname, './logs/newbie_update.log'),
+                path: path.join(__dirname, '.', 'logs/newbie_update.log'),
                 period: '1d',          // daily rotation
                 totalFiles: 1000,      // keep up to 1000 back copies
                 rotateExisting: true,  // Give ourselves a clean file when we start up, based on period
@@ -32,7 +33,7 @@ var log = bunyan.createLogger({
                 totalSize: '1g',       // Don't keep more than 1gb of archived log files
                 gzip: true             // Compress the archive log files to save space
             }),
-            level: "debug"
+            level: 'debug'
         }
     ],
     level : bunyan.DEBUG
@@ -64,8 +65,10 @@ function getContacts(args, action) {
                 case "Waiting":
                 case "Processing":
                     // asyncrounous request may take a few seconds to complete
-                    log.info("Request processing -- keep checking for results every %d seconds", interval / 1000);
-                    setTimeout(getContacts, interval, args);
+                    var resId = contactData.ResultId;
+                    log.info("Request processing (result ID: %s) ... keep checking for results every %d seconds",
+                        resId, interval / 1000);
+                    setTimeout(getContacts, interval, args, action);
                     break;
                     case "Complete":
                     // process results
@@ -76,7 +79,8 @@ function getContacts(args, action) {
                     } else {
                         // query complete -- get the results (an extra API call)
                         var resId = contactData.ResultId;
-                        log.info("Request complete. Retrieving contacts... (result ID: %s)", resId);
+                        log.info("Request complete. Retrieving contacts with action %s ... (result ID: %s)",
+                            action, resId);
                         var resArgs = _.clone(args);
                         resArgs.parameters = {resultId: resId};
                         setTimeout(getContacts, 1000, resArgs, action); // delay one more second...
@@ -93,6 +97,7 @@ function getContacts(args, action) {
                         contactData.State);
             }
         }
+        return 1;
     });
 }
 
@@ -116,28 +121,89 @@ const processContacts = function(contacts, action) {
 
     // For each newbie
     _.each(newbies, function(newbie) {
+        const memberSince = newbie.FieldValues.filter(function(field) {
+            return field.FieldName === 'Member since';
+        })[0].Value;
+        const newbieFlag = newbie.FieldValues.filter(function(field) {
+            return field.FieldName === 'New member';
+        })[0].Value;
+        const newbieStatusSysCode = newbie.FieldValues.filter(function(field) {
+            return field.FieldName === 'New member';
+        })[0].SystemCode;
+        const newbieStatusUpd = newbie.FieldValues.filter(function(field) {
+            return field.FieldName === 'New member updated on';
+        })[0].Value;
+        const newbieStatusUpdSysCode = newbie.FieldValues.filter(function(field) {
+            return field.FieldName === 'New member updated on';
+        })[0].SystemCode;
+
+        var logMsg;
         switch(action) {
             case "setNewbieFlag":
                 // If the newbie flag isn't set yet, set it
-                log.info("Newbie %s %s (ID: %s | status: %s) joined on %s",
-                    newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                    newbie.FieldValues.filter(function(field) {
-                        return field.FieldName === 'Member since';
-                    })[0].Value);
+                if (_.isNil(newbieFlag)) {
+                    const newbieUpdateArgs = {
+                        path: { accountId: config.accountId, contactId: newbie.Id.toString() },
+                        data: {
+                            "Id": newbie.Id,
+                            "FieldValues": [
+                                {
+                                    "FieldName": "New member",
+                                    "SystemCode": newbieStatusSysCode,
+                                    "Value": "Yes"
+                                },
+                                {
+                                    "FieldName": "New member updated on",
+                                    "SystemCode": newbieStatusUpdSysCode,
+                                    "Value": formatDate(new Date())
+                                }
+                            ]
+                        }
+                    };
+                    apiClient.methods.updateContact(newbieUpdateArgs, function(contactDataUpd, response) {
+                        log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined on: %s)",
+                            (_.isNil(newbieStatusUpd) ? "set" : "reset"),
+                            contactDataUpd.FirstName, contactDataUpd.LastName,
+                            contactDataUpd.Id, contactDataUpd.Status, memberSince);
+                    });
+                } else {
+                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined on: %s) already set to '%s' on %s",
+                        newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
+                        memberSince, newbieFlag.Label, newbieStatusUpd);
+                }
                 break;
 
             case "clearNewbieFlag":
                 // If the newbie flag is set, clear it
-                log.info("Member %s %s (ID: %s | status: %s) joined on %s",
-                    newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                    newbie.FieldValues.filter(function(field) {
-                        return field.FieldName === 'Member since';
-                    })[0].Value);
-                break;
+                const memberUpdateArgs = {
+                    path: { accountId: config.accountId, contactId: newbie.Id.toString() },
+                    data: {
+                        "Id": newbie.Id,
+                        "FieldValues": [
+                            {
+                                "FieldName": "New member",
+                                "SystemCode": newbieStatusSysCode,
+                                "Value": "No"
+                            },
+                            {
+                                "FieldName": "New member updated on",
+                                "SystemCode": newbieStatusUpdSysCode,
+                                "Value": formatDate(new Date())
+                            }
+                        ]
+                    }
+                };
+                apiClient.methods.updateContact(memberUpdateArgs, function(contactDataUpd, response) {
+                    log.info("Newbie flag cleared for %s %s (ID: %s | status: %s | joined on: %s)",
+                        contactDataUpd.FirstName, contactDataUpd.LastName, contactDataUpd.Id, contactDataUpd.Status, memberSince);
+                });
+            break;
 
             default:
-                log.debug("This should not happen -- requested action is '%s'", action);
+                log.warn("This should not happen -- requested action is '%s'", action);
         }
+    }, function (err) {
+        if (err) { throw err; }
     });
 };
 
@@ -148,28 +214,50 @@ process.on('uncaughtException', (err) => {
     log.error(1, `${err}`);
 });
 
+// format date
+function formatDate(d) {
+    var month = '' + (d.getMonth() + 1),
+        day = '' + d.getDate(),
+        year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
+}
+
 // calculate today - 90 days for newbie status
 var today = new Date();
 today.setDate(today.getDate() - 90);
 todayMinus90 = today.toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
 
-// set query filter parameters
+/*******************************
+ * set query filter parameters *
+ *******************************/
+
+// newbies -- 1-90 days from join date
 const newbieArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' gt " +
-            todayMinus90
+        $filter: "'Id' eq '47506410'" /*+ " AND " +
+                 "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' gt " +
+                 todayMinus90*/
+
     }
 };
 
+// members -- 91+ days since join date
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
-            todayMinus90
+        $filter: "'Id' eq '47506410'" /*+ " AND " +
+                 "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
+                 todayMinus90*/
     }
 };
 
-// run it!
+/***********
+ * run it! *
+ ***********/
 getContacts(newbieArgs, 'setNewbieFlag');
 getContacts(memberArgs, 'clearNewbieFlag');
