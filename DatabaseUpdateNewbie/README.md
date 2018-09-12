@@ -9,32 +9,42 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 
 ## Prerequisites
 
-You __***must***__ have Administrator rights on WildApricot. Contact the [Technology Committee](mailto:technology@sbnewcomers.org) for assistance.
+* You __***must***__ have Administrator rights on WildApricot. Contact the [Technology Committee](mailto:technology@sbnewcomers.org) for assistance.
+* Target e-mail address for reporting (e.g., technology@sbnewcomers.org) __***must***__ be verified in the Amazon Simple E-mail Service (SES) console [HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html).
 
 ## Running
 
-1. Copy `.env_sample` to `.env`
+1. Copy the file `.env_sample` to `.env`
 
-2. Edit `.env` and update with your SBNC login credentials
+2. Edit the file `.env` and update with your SBNC login credentials
    ```
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
    wildapricot_client_id=<sbniapi_client_id>
    wildapricot_client_secret=<sbniapi_client_secret>
    ```
-   The `wildapricot_account_id` value should not change. The `wildapricot_client_id` and `wildapricot_client_secret` values can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
+
+   The values for `wildapricot_client_id` and `wildapricot_client_secret` can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
+
+   The values for `wildapricot_account_id` and `wildapricot_scope` should not change.
 
    <kbd style="border: 1px solid; width: 600px;">![Authorized Application](/../screenshots/application.png?raw=true "Authorized Application")</kbd>
 
    If you need more assistance, contact the [Technology Committee](mailto:technology@sbnewcomers.org).
 
-3. Execute the following commands:
+3. Copy the file `aws_sample.json` to `aws.json`
+
+4. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the [Technology Committee](mailto:technology@sbnewcomers.org).
+
+5. Execute the following commands:
    ```bash
    npm install
    node index.js
    ```
 
 ## Viewing the Log
+
+To view the current log file, execute the following commands:
 
 On Mac/Linux
 

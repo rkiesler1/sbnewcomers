@@ -1,9 +1,11 @@
 /*jshint esversion: 6 */
-const _       = require('lodash');
-const async   = require('async');
-const path    = require('path');
-const util    = require('util');
+const _        = require('lodash');
+const async    = require('async');
+const path     = require('path');
+const util     = require('util');
+const aws      = require('aws-sdk');
 
+aws.config.loadFromPath('./aws.json');
 const config = require(path.join(__dirname, '.', 'config.js'));
 const wildapricot = require(path.join(__dirname, '.', 'wildapricot.js'));
 
@@ -61,24 +63,69 @@ function getContacts(args, action) {
     apiClient.methods.listContacts(args, function(contactData, response) {
         if (!_.isNil(contactData) && !_.isNil(contactData.State)) {
             // good response
+            var resId;
             switch (contactData.State) {
                 case "Waiting":
                 case "Processing":
                     // asyncrounous request may take a few seconds to complete
-                    var resId = contactData.ResultId;
+                    resId = contactData.ResultId;
                     log.info("Request processing (result ID: %s) ... keep checking for results every %d seconds",
                         resId, interval / 1000);
                     setTimeout(getContacts, interval, args, action);
                     break;
-                    case "Complete":
+
+                case "Complete":
                     // process results
                     if (!_.isNil(contactData.Contacts)) {
-                        if (_.isArray(contactData.Contacts)) {
+                        if (_.isArray(contactData.Contacts) && contactData.Contacts.length > 0) {
                             processContacts(contactData.Contacts, action);
+                            console.log("********* email ***********");
+
+                            // Create sendEmail params
+                            var params = {
+                                Destination: {
+                                    ToAddresses: [
+                                        'rkiesler@gmail.com'    // TODO: sub w/ technology
+                                    ]
+                                },
+                                Message: {
+                                    Body: {
+                                        Html: {
+                                            Charset: "UTF-8",
+                                            Data: action + " completed for " + contactData.Contacts.length + " member(s)"
+                                        },
+                                        Text: {
+                                            Charset: "UTF-8",
+                                            Data: action + " complete"
+                                        }
+                                    },
+                                    Subject: {
+                                        Charset: 'UTF-8',
+                                        Data: 'Newbie Flag Database Update'
+                                    }
+                                },
+                                Source: 'rkiesler@gmail.com',   // TODO: sub w/ technology
+                                ReplyToAddresses: [
+                                    'no-reply@sbnewcomers.org'
+                                ]
+                            };
+
+                            // Create the promise and SES service object
+                            var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+                            // Handle promise's fulfilled/rejected states
+                            sendPromise.then(
+                                function (data) {
+                                    console.log(data.MessageId);
+                                }).catch(
+                                function (err) {
+                                    console.error(err, err.stack);
+                                }
+                            );
                         }
                     } else {
                         // query complete -- get the results (an extra API call)
-                        var resId = contactData.ResultId;
+                        resId = contactData.ResultId;
                         log.info("Request complete. Retrieving contacts with action %s ... (result ID: %s)",
                             action, resId);
                         var resArgs = _.clone(args);
@@ -250,9 +297,9 @@ const newbieArgs = {
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Id' eq '47506410'" /*+ " AND " +
+        $filter: "'Id' eq '47506410'" + " AND " +
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
-                 todayMinus90*/
+                 todayMinus90
     }
 };
 
