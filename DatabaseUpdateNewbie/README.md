@@ -10,7 +10,7 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 ## Prerequisites
 
 * You __***must***__ have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
-* Target e-mail address for reporting (e.g., technology@sbnewcomers.org) __***must***__ be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
+* Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) __***must***__ be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
 
 ## Running
 
@@ -35,7 +35,7 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 3. Copy the file `aws_sample.json` to `aws.json`
 
 4. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
-   ```json
+   ```javascript
    {
       "accessKeyId": "<your_aws_access_key>",
       "secretAccessKey": "<your_aws_secret_key>",
