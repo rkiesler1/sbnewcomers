@@ -17,7 +17,7 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 1. Copy the file `.env_sample` to `.env`
 
 2. Edit the file `.env` and update with your SBNC login credentials
-   ```
+   ```ini
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
    wildapricot_client_id=<sbniapi_client_id>
@@ -35,6 +35,13 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 3. Copy the file `aws_sample.json` to `aws.json`
 
 4. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
+   ```json
+   {
+      "accessKeyId": "<your_aws_access_key>",
+      "secretAccessKey": "<your_aws_secret_key>",
+      "region": "us-west-2"
+   }
+   ```
 
 5. Execute the following commands:
    ```bash
