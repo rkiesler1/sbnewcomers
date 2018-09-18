@@ -3,20 +3,38 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 
 ## Requirements
 
-* [Node.js](https://nodejs.org/en/download/) v8.11.4 or later
-* NPM v6.4.0 or later (run `npm install -g npm@latest` after installing Node.js)
+* [Node.js](https://nodejs.org/en/download/) v8.12.0 or later
+* NPM v6.4.1 or later
 * [Python](https://www.python.org/downloads/) 2.7.15 or later
+* Git v2.14 or later
 
 ## Prerequisites
 
 * You __***must***__ have Administrator rights on WildApricot. Contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)) for assistance.
 * Recipient e-mail address for reporting (e.g., technology@sbnewcomers.org) __***must***__ be verified in the Amazon Simple E-mail Service (SES) console ([HOWTO](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html)).
 
-## Running
+## Linux Setup
 
-1. Copy the file `.env_sample` to `.env`
+1. Execute the following commands to install all prerequisites:
+   ```bash
+   yum install git
+   git --version
+   curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
+   . ~/.nvm/nvm.sh
+   nvm install 8.12.0
+   node -v
+   npm -v
+   ```
 
-2. Edit the file `.env` and update with your SBNC login credentials
+2. Execute the following commands:
+   ```bash
+   git clone https://github.com/rkiesler1/sbnewcomers.git
+   cd sbnewcomers/DatabaseUpdateNewbie
+   ```
+
+3. Copy the file `.env_sample` to `.env`
+
+4. Edit the file `.env` and update with your SBNC login credentials
    ```ini
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
@@ -32,9 +50,9 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 
    If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
 
-3. Copy the file `aws_sample.json` to `aws.json`
+5. Copy the file `aws_sample.json` to `aws.json`
 
-4. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
+6. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
    ```javascript
    {
       "accessKeyId": "<your_aws_access_key>",
@@ -43,11 +61,17 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
    }
    ```
 
-5. Execute the following commands:
+7. Execute the following commands:
    ```bash
    npm install
-   node index.js
    ```
+
+## Running
+
+Execute the following commands:
+```bash
+node index.js
+```
 
 ## Viewing the Log
 
