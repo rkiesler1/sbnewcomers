@@ -170,7 +170,7 @@ const processContacts = function(contacts, action) {
     _.each(newbies, function(newbie) {
         const memberSince = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'Member since';
-        })[0].Value;
+        })[0].Value.substring(0,10);
         const newbieFlag = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member';
         })[0].Value;
@@ -179,7 +179,7 @@ const processContacts = function(contacts, action) {
         })[0].SystemCode;
         const newbieStatusUpd = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member updated on';
-        })[0].Value;
+        })[0].Value.substring(0,10);
         const newbieStatusUpdSysCode = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member updated on';
         })[0].SystemCode;
@@ -208,13 +208,13 @@ const processContacts = function(contacts, action) {
                         }
                     };
                     apiClient.methods.updateContact(newbieUpdateArgs, function(contactDataUpd, response) {
-                        log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined on: %s)",
+                        log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined: %s)",
                             (_.isNil(newbieStatusUpd) ? "set" : "reset"),
                             contactDataUpd.FirstName, contactDataUpd.LastName,
                             contactDataUpd.Id, contactDataUpd.Status, memberSince);
                     });
                 } else {
-                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined on: %s) already set to '%s' on %s",
+                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
                         newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
                         memberSince, newbieFlag.Label, newbieStatusUpd);
                 }
@@ -241,7 +241,7 @@ const processContacts = function(contacts, action) {
                     }
                 };
                 apiClient.methods.updateContact(memberUpdateArgs, function(contactDataUpd, response) {
-                    log.info("Newbie flag cleared for %s %s (ID: %s | status: %s | joined on: %s)",
+                    log.info("Newbie flag cleared for %s %s (ID: %s | status: %s | joined: %s)",
                         contactDataUpd.FirstName, contactDataUpd.LastName, contactDataUpd.Id, contactDataUpd.Status, memberSince);
                 });
             break;
