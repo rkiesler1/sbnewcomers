@@ -295,9 +295,9 @@ todayMinus90 = today.toISOString().substring(0, 10);    // keep the yyyy-mm-dd p
 const newbieArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Id' eq '47506410'" /*+ " AND " +
+        $filter: /*"'Id' eq '47506410'" + " AND " +*/
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' gt " +
-                 todayMinus90*/
+                 todayMinus90
 
     }
 };
@@ -306,9 +306,9 @@ const newbieArgs = {
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Id' eq '47506410'" /*+ " AND " +
+        $filter: /*"'Id' eq '47506410'" + " AND " +*/
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
-                 todayMinus90*/
+                 todayMinus90
     }
 };
 
