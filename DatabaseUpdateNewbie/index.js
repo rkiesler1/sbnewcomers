@@ -79,13 +79,12 @@ function getContacts(args, action) {
                     if (!_.isNil(contactData.Contacts)) {
                         if (_.isArray(contactData.Contacts) && contactData.Contacts.length > 0) {
                             processContacts(contactData.Contacts, action);
-                            console.log("********* email ***********");
 
                             // Create sendEmail params
                             var params = {
                                 Destination: {
                                     ToAddresses: [
-                                        'rkiesler@gmail.com'    // TODO: sub w/ technology
+                                        'HelpDesk@sbnewcomers.org'
                                     ]
                                 },
                                 Message: {
@@ -104,7 +103,7 @@ function getContacts(args, action) {
                                         Data: 'Newbie Flag Database Update'
                                     }
                                 },
-                                Source: 'rkiesler@gmail.com',   // TODO: sub w/ technology
+                                Source: 'HelpDesk@sbnewcomers.org',
                                 ReplyToAddresses: [
                                     'no-reply@sbnewcomers.org'
                                 ]
