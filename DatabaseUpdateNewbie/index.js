@@ -9,6 +9,10 @@ aws.config.loadFromPath('./aws.json');
 const config = require(path.join(__dirname, '.', 'config.js'));
 const wildapricot = require(path.join(__dirname, '.', 'wildapricot.js'));
 
+// configure mail
+const emailTo = "HelpDesk@sbnewcomers.org";
+const emailFrom = "HelpDesk@sbnewcomers.org";
+
 // configure logging
 var fs = require('fs');
 var logsDir = path.join(__dirname, './logs');
@@ -84,7 +88,7 @@ function getContacts(args, action) {
                             var params = {
                                 Destination: {
                                     ToAddresses: [
-                                        'HelpDesk@sbnewcomers.org'
+                                        emailTo
                                     ]
                                 },
                                 Message: {
@@ -103,7 +107,7 @@ function getContacts(args, action) {
                                         Data: 'Newbie Flag Database Update'
                                     }
                                 },
-                                Source: 'HelpDesk@sbnewcomers.org',
+                                Source: emailFrom,
                                 ReplyToAddresses: [
                                     'no-reply@sbnewcomers.org'
                                 ]
