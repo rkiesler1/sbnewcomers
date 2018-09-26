@@ -171,18 +171,24 @@ const processContacts = function(contacts, action) {
 
     // For each newbie
     _.each(newbies, function(newbie) {
-        const memberSince = newbie.FieldValues.filter(function(field) {
+        var memberSince = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'Member since';
-        })[0].Value.substring(0,10);
+        })[0].Value;
+        if (!_.isNil(memberSince)) {
+            memberSince = memberSince.substring(0,10);
+        }
         const newbieFlag = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member';
         })[0].Value;
         const newbieStatusSysCode = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member';
         })[0].SystemCode;
-        const newbieStatusUpd = newbie.FieldValues.filter(function(field) {
+        var newbieStatusUpd = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member updated on';
-        })[0].Value.substring(0,10);
+        })[0].Value;
+        if (!_.isNil(newbieStatusUpd)) {
+            newbieStatusUpd = newbieStatusUpd.substring(0,10);
+        };
         const newbieStatusUpdSysCode = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member updated on';
         })[0].SystemCode;
@@ -219,7 +225,7 @@ const processContacts = function(contacts, action) {
                 } else {
                     log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
                         newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                        memberSince, newbieFlag.Label, newbieStatusUpd);
+                        memberSince, newbieFlag.Label, (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
                 }
                 break;
 
@@ -289,9 +295,9 @@ todayMinus90 = today.toISOString().substring(0, 10);    // keep the yyyy-mm-dd p
 const newbieArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: /*"'Id' eq '47506410'" + " AND " +*/
+        $filter: "'Id' eq '47506410'" /*+ " AND " +
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' gt " +
-                 todayMinus90
+                 todayMinus90*/
 
     }
 };
@@ -300,9 +306,9 @@ const newbieArgs = {
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: /*"'Id' eq '47506410'" + " AND " +*/
+        $filter: "'Id' eq '47506410'" /*+ " AND " +
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
-                 todayMinus90
+                 todayMinus90*/
     }
 };
 
