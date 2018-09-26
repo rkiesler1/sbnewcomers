@@ -66,12 +66,24 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
    npm install
    ```
 
-## Running
+## Executing the Script
 
+### Manually
+
+###
 Execute the following commands:
 ```bash
 node index.js
 ```
+
+Add the following `cron` jobs to `/etc/cron.daily`:
+```bash
+0 7 * * * cd /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie && ~/.nvm/versions/node/v8.12.0/bin/node /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie/index.js
+0 8 * * * > /var/spool/mail/ec2-user
+```
+
+### On a Schedule
+
 
 ## Viewing the Log
 
