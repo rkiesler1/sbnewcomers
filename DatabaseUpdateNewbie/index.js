@@ -10,8 +10,8 @@ const config = require(path.join(__dirname, '.', 'config.js'));
 const wildapricot = require(path.join(__dirname, '.', 'wildapricot.js'));
 
 // configure mail
-const emailTo = "HelpDesk@sbnewcomers.org";
-//const emailTo = "rkiesler@gmail.com";
+//const emailTo = "HelpDesk@sbnewcomers.org";
+const emailTo = "rkiesler@gmail.com";
 const emailFrom = "HelpDesk@sbnewcomers.org";
 
 // configure logging
@@ -28,7 +28,7 @@ var log = bunyan.createLogger({
     streams: [
         {
             stream: process.stderr,
-            level: 'debug'
+            level: 'info'
         },
         {
             stream: new RotatingFileStream({
@@ -40,10 +40,10 @@ var log = bunyan.createLogger({
                 totalSize: '1g',       // Don't keep more than 1gb of archived log files
                 gzip: true             // Compress the archive log files to save space
             }),
-            level: 'debug'
+            level: 'trace'
         }
     ],
-    level : bunyan.DEBUG
+    level : bunyan.TRACE
 });
 
 /*****************************
@@ -74,7 +74,7 @@ function getContacts(args, action) {
                 case "Processing":
                     // asyncrounous request may take a few seconds to complete
                     resId = contactData.ResultId;
-                    log.info("Request processing (result ID: %s) ... keep checking for results every %d seconds",
+                    log.trace("Request processing (result ID: %s) ... keep checking for results every %d seconds",
                         resId, interval / 1000);
                     setTimeout(getContacts, interval, args, action);
                     break;
@@ -148,7 +148,7 @@ function getContacts(args, action) {
                     break;
 
                 default:
-                    log.debug("This should not happen unless the API is changed -- retrned state is '%s'",
+                    log.trace("This should not happen unless the API is changed -- retrned state is '%s'",
                         contactData.State);
             }
         }
@@ -165,7 +165,7 @@ var errors = 0;
  * Update a member record *
  **************************/
 const processContact = function(contact, callback) {
-    log.debug("Processing contact ID %s with action %", contact.args.data.Id, contact.action);
+    log.trace("Processing contact ID %s with action %", contact.args.data.Id, contact.action);
     apiClient.methods.updateContact(contact.args, function(contactDataUpd, response) {
         if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
             processed++;
@@ -178,7 +178,8 @@ const processContact = function(contact, callback) {
             const msg = util.format("Failed to %s newbie update flag for contact ID %s",
                 contact.action.substring(0, contact.action.indexOf('NewbieFlag' + 1)),
                 contact.args.data.Id);
-                callback(new Error(msg));
+            log.error(msg);
+            callback(new Error(msg));
         }
     });
 };
@@ -255,7 +256,7 @@ const processContacts = function(contacts, action) {
                         newbieStatusUpd: newbieStatusUpd
                     });
                 } else {
-                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
+                    log.trace("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
                         newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
                         memberSince, newbieFlag.Label, (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
                 }
@@ -292,7 +293,8 @@ const processContacts = function(contacts, action) {
                 } else {
                     log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
                         newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                        memberSince, newbieFlag.Label, (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
+                        memberSince, (_.isNil(newbieFlag) || _.isNil(newbieFlag.Label) ? "NULL" : newbieFlag.Label),
+                        (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
                 }
 
                 break;

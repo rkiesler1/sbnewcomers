@@ -15,7 +15,7 @@ var log = bunyan.createLogger({
     streams: [
         {
             stream: process.stderr,
-            level: "debug"
+            level: "info"
         },
         {
             stream: new RotatingFileStream({
@@ -27,10 +27,10 @@ var log = bunyan.createLogger({
                 totalSize: '1g',       // Don't keep more than 1gb of archived log files
                 gzip: true             // Compress the archive log files to save space
             }),
-            level: "debug"
+            level: "trace"
         }
     ],
-    level : bunyan.DEBUG
+    level : bunyan.TRACE
 });
 
 var options         = {
@@ -57,7 +57,7 @@ function authenticate(callback) {
             throw new Error(data.error + (data.error_description ? ': ' + data.error_description : ''));
         } else if (data && data.access_token) {
             accessToken = data.access_token;
-            log.info("OAuth token: %s", accessToken);
+            log.trace("OAuth token: %s", accessToken);
             tokenExpiresAt = new Date();
             tokenExpiresAt.setSeconds(tokenExpiresAt.getSeconds() + data.expires_in);
         }
