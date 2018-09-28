@@ -5,12 +5,13 @@ const path     = require('path');
 const util     = require('util');
 const aws      = require('aws-sdk');
 
-aws.config.loadFromPath('./aws.json');
+aws.config.loadFromPath(path.join(__dirname, '.', 'aws.json'));
 const config = require(path.join(__dirname, '.', 'config.js'));
 const wildapricot = require(path.join(__dirname, '.', 'wildapricot.js'));
 
 // configure mail
 const emailTo = "HelpDesk@sbnewcomers.org";
+//const emailTo = "rkiesler@gmail.com";
 const emailFrom = "HelpDesk@sbnewcomers.org";
 
 // configure logging
@@ -82,7 +83,7 @@ function getContacts(args, action) {
                     // process results
                     if (!_.isNil(contactData.Contacts)) {
                         if (_.isArray(contactData.Contacts) && contactData.Contacts.length > 0) {
-                            processContacts(contactData.Contacts, action);
+                            var count = processContacts(contactData.Contacts, action);
 
                             // Create sendEmail params
                             var params = {
@@ -95,11 +96,11 @@ function getContacts(args, action) {
                                     Body: {
                                         Html: {
                                             Charset: "UTF-8",
-                                            Data: action + " completed for " + contactData.Contacts.length + " member(s)"
+                                            Data: util.format("%s completed for %d member(s) with %d error(s)", action, count, errors)
                                         },
                                         Text: {
                                             Charset: "UTF-8",
-                                            Data: action + " complete"
+                                            Data: util.format("%s completed for %d member(s) with %d error(s)", action, count, errors)
                                         }
                                     },
                                     Subject: {
@@ -115,6 +116,10 @@ function getContacts(args, action) {
 
                             // Create the promise and SES service object
                             var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+
+                            // reset counters
+                            processed = 0;
+                            errors = 0;
 
                             // Handle promise's fulfilled/rejected states
                             sendPromise.then(
@@ -151,12 +156,37 @@ function getContacts(args, action) {
     });
 }
 
+// allowable actions
+const actions = ['setNewbieFlag', 'clearNewbieFlag'];
+var processed = 0;
+var errors = 0;
+
 /**************************
  * Update a member record *
  **************************/
+const processContact = function(contact, callback) {
+    log.debug("Processing contact ID %s with action %", contact.args.data.Id, contact.action);
+    apiClient.methods.updateContact(contact.args, function(contactDataUpd, response) {
+        if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
+            processed++;
+            log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined: %s)",
+                (_.isNil(contact.newbieStatusUpd) ? "set" : "reset"),
+                contactDataUpd.FirstName, contactDataUpd.LastName,
+                contactDataUpd.Id, contactDataUpd.Status, contact.memberSince);
+            callback();
+        } else {
+            const msg = util.format("Failed to %s newbie update flag for contact ID %s",
+                contact.action.substring(0, contact.action.indexOf('NewbieFlag' + 1)),
+                contact.args.data.Id);
+                callback(new Error(msg));
+        }
+    });
+};
+
+/*************************
+ * Update member records *
+ *************************/
 const processContacts = function(contacts, action) {
-    // allowable actions
-    const actions = ['setNewbieFlag', 'clearNewbieFlag'];
     if (actions.indexOf(action) < 0) {
         throw new Error(util.format("Unsupported action (%s)", action));
     }
@@ -170,7 +200,9 @@ const processContacts = function(contacts, action) {
     log.info("%d contacts retrieved", newbies.length);
 
     // For each newbie
-    _.each(newbies, function(newbie) {
+    var newbieRecords = [];
+    for (var n = 0; n < newbies.length; n++) {
+        var newbie = newbies[n];
         var memberSince = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'Member since';
         })[0].Value;
@@ -188,7 +220,7 @@ const processContacts = function(contacts, action) {
         })[0].Value;
         if (!_.isNil(newbieStatusUpd)) {
             newbieStatusUpd = newbieStatusUpd.substring(0,10);
-        };
+        }
         const newbieStatusUpdSysCode = newbie.FieldValues.filter(function(field) {
             return field.FieldName === 'New member updated on';
         })[0].SystemCode;
@@ -197,7 +229,7 @@ const processContacts = function(contacts, action) {
         switch(action) {
             case "setNewbieFlag":
                 // If the newbie flag isn't set yet, set it
-                if (_.isNil(newbieFlag)) {
+                if (_.isNil(newbieFlag) || newbieFlag.Label == "No") {
                     const newbieUpdateArgs = {
                         path: { accountId: config.accountId, contactId: newbie.Id.toString() },
                         data: {
@@ -216,11 +248,11 @@ const processContacts = function(contacts, action) {
                             ]
                         }
                     };
-                    apiClient.methods.updateContact(newbieUpdateArgs, function(contactDataUpd, response) {
-                        log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined: %s)",
-                            (_.isNil(newbieStatusUpd) ? "set" : "reset"),
-                            contactDataUpd.FirstName, contactDataUpd.LastName,
-                            contactDataUpd.Id, contactDataUpd.Status, memberSince);
+                    newbieRecords.push({
+                        args: newbieUpdateArgs,
+                        action: action,
+                        memberSince: memberSince,
+                        newbieStatusUpd: newbieStatusUpd
                     });
                 } else {
                     log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
@@ -231,36 +263,53 @@ const processContacts = function(contacts, action) {
 
             case "clearNewbieFlag":
                 // If the newbie flag is set, clear it
-                const memberUpdateArgs = {
-                    path: { accountId: config.accountId, contactId: newbie.Id.toString() },
-                    data: {
-                        "Id": newbie.Id,
-                        "FieldValues": [
-                            {
-                                "FieldName": "New member",
-                                "SystemCode": newbieStatusSysCode,
-                                "Value": "No"
-                            },
-                            {
-                                "FieldName": "New member updated on",
-                                "SystemCode": newbieStatusUpdSysCode,
-                                "Value": formatDate(new Date())
-                            }
-                        ]
-                    }
-                };
-                apiClient.methods.updateContact(memberUpdateArgs, function(contactDataUpd, response) {
-                    log.info("Newbie flag cleared for %s %s (ID: %s | status: %s | joined: %s)",
-                        contactDataUpd.FirstName, contactDataUpd.LastName, contactDataUpd.Id, contactDataUpd.Status, memberSince);
-                });
-            break;
+                if (!_.isNil(newbieFlag) && newbieFlag.Label == "Yes") {
+                    const memberUpdateArgs = {
+                        path: { accountId: config.accountId, contactId: newbie.Id.toString() },
+                        data: {
+                            "Id": newbie.Id,
+                            "FieldValues": [
+                                {
+                                    "FieldName": "New member",
+                                    "SystemCode": newbieStatusSysCode,
+                                    "Value": "No"
+                                },
+                                {
+                                    "FieldName": "New member updated on",
+                                    "SystemCode": newbieStatusUpdSysCode,
+                                    "Value": formatDate(new Date())
+                                }
+                            ]
+                        }
+                    };
+
+                    newbieRecords.push({
+                        args: memberUpdateArgs,
+                        action: action,
+                        memberSince: memberSince,
+                        newbieStatusUpd: newbieStatusUpd
+                    });
+                } else {
+                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
+                        newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
+                        memberSince, newbieFlag.Label, (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
+                }
+
+                break;
 
             default:
                 log.warn("This should not happen -- requested action is '%s'", action);
         }
-    }, function (err) {
-        if (err) { throw err; }
+    }
+
+    async.eachSeries(newbieRecords, processContact, function(err) {
+        if (err) {
+            //throw err;    // continue even if one update fails.
+            log.error(err);
+        }
     });
+
+    return processed;
 };
 
 /*****************
