@@ -62,6 +62,7 @@ typings/
 
 # AWS credentials
 aws.json
+aws.rkiesler.json
 
 # next.js build output
 .next

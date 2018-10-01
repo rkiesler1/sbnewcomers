@@ -15,26 +15,15 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 
 ## Linux Setup
 
-1. Execute the following commands to install all prerequisites:
-   ```bash
-   yum install git
-   git --version
-   curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
-   . ~/.nvm/nvm.sh
-   nvm install 8.12.0
-   node -v
-   npm -v
-   ```
-
-2. Execute the following commands:
+1. Execute the following commands:
    ```bash
    git clone https://github.com/rkiesler1/sbnewcomers.git
    cd sbnewcomers/DatabaseUpdateNewbie
    ```
 
-3. Copy the file `.env_sample` to `.env`
+2. Copy the file `.env_sample` to `.env`
 
-4. Edit the file `.env` and update with your SBNC login credentials
+3. Edit the file `.env` and update with your SBNC login credentials
    ```ini
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
@@ -50,9 +39,9 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
 
    If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
 
-5. Copy the file `aws_sample.json` to `aws.json`
+4. Copy the file `aws_sample.json` to `aws.json`
 
-6. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
+5. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
    ```javascript
    {
       "accessKeyId": "<your_aws_access_key>",
@@ -61,7 +50,7 @@ A Node.js script that uses the WildApricot API to execute a daily query of membe
    }
    ```
 
-7. Execute the following commands:
+6. Execute the following commands:
    ```bash
    npm install
    ```
