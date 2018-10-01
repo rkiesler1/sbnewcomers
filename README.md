@@ -29,3 +29,5 @@ npm -v
 ## Projects
 
 * [Database Update for Newbies](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
+
+* [Member Since Field Copy](./MemberSinceFieldCopy) - A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
