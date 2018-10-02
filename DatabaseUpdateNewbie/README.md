@@ -1,45 +1,9 @@
 # Database Update for Newbies
 A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
 
-## Linux Setup
-
 1. Execute the following commands:
    ```bash
-   git clone https://github.com/rkiesler1/sbnewcomers.git
    cd sbnewcomers/DatabaseUpdateNewbie
-   ```
-
-2. Copy the file `.env_sample` to `.env`
-
-3. Edit the file `.env` and update with your SBNC login credentials
-   ```ini
-   wildapricot_user_id=<your_sbnc_user_id>
-   wildapricot_password=<your_sbnc_password>
-   wildapricot_client_id=<sbniapi_client_id>
-   wildapricot_client_secret=<sbniapi_client_secret>
-   ```
-
-   The values for `wildapricot_client_id` and `wildapricot_client_secret` can be obtained from the SBNCAPI authorized application (see the **Settings >> Security >> Authorized applications** option on WildApricot). If the SBNCAPI application is ever deleted, a new authorized application can be created in its place ([HOWTO](https://gethelp.wildapricot.com/en/articles/180-authorizing-external-applications)).
-
-   The values for `wildapricot_account_id` and `wildapricot_scope` should not change.
-
-   <kbd style="border: 1px solid; width: 600px;">![Authorized Application](/../screenshots/application.png?raw=true "Authorized Application")</kbd>
-
-   If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
-
-4. Copy the file `aws_sample.json` to `aws.json`
-
-5. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
-   ```javascript
-   {
-      "accessKeyId": "<your_aws_access_key>",
-      "secretAccessKey": "<your_aws_secret_key>",
-      "region": "us-west-2"
-   }
-   ```
-
-6. Execute the following commands:
-   ```bash
    npm install
    ```
 
