@@ -30,6 +30,7 @@ Repository for all projects by SB Newcomers Technology committee members
    ```bash
    git clone https://github.com/rkiesler1/sbnewcomers.git
    cd sbnewcomers/shared
+   npm install
    ```
 
 3. Copy the file `.env_sample` to `.env`
