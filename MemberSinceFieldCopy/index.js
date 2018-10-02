@@ -1,9 +1,9 @@
 /*jshint esversion: 6 */
 const _        = require('lodash');
 const async    = require('async');
+const aws      = require('aws-sdk');
 const path     = require('path');
 const util     = require('util');
-const aws      = require('aws-sdk');
 
 aws.config.loadFromPath(path.join(__dirname, '..', 'shared/aws.json'));
 const config = require(path.join(__dirname, '..', 'shared/config.js'));
@@ -28,11 +28,11 @@ var log = bunyan.createLogger({
     streams: [
         {
             stream: process.stderr,
-            level: 'info'
+            level: 'trace'
         },
         {
             stream: new RotatingFileStream({
-                path: path.join(__dirname, '.', 'logs/newbie_update.log'),
+                path: path.join(__dirname, '.', 'logs/member_since_copy.log'),
                 period: '1d',          // daily rotation
                 totalFiles: 1000,      // keep up to 1000 back copies
                 rotateExisting: true,  // Give ourselves a clean file when we start up, based on period
@@ -64,7 +64,7 @@ var apiClient = wildapricot.init({
 function getContacts(args, action) {
     const interval = 10000;
 
-    // send the newbie query to the API
+    // send the member contacts query to the API
     apiClient.methods.listContacts(args, function(contactData, response) {
         if (!_.isNil(contactData) && !_.isNil(contactData.State)) {
             // good response
@@ -111,7 +111,7 @@ function getContacts(args, action) {
 }
 
 // allowable actions
-const actions = ['setNewbieFlag', 'clearNewbieFlag'];
+const actions = ['copyMemberSince'];
 var processed = 0;
 var errors = 0;
 
@@ -123,14 +123,12 @@ const processContact = function(contact, callback) {
     apiClient.methods.updateContact(contact.args, function(contactDataUpd, response) {
         if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
             processed++;
-            log.info("Newbie status %s for %s %s (ID: %s | status: %s | joined: %s)",
-                (_.isNil(contact.newbieStatusUpd) ? "set" : "reset"),
+            log.info("Member since readonly field set for %s %s (ID: %s | status: %s | joined: %s)",
                 contactDataUpd.FirstName, contactDataUpd.LastName,
                 contactDataUpd.Id, contactDataUpd.Status, contact.memberSince);
             callback();
         } else {
-            const msg = util.format("Failed to %s newbie update flag for contact ID %s",
-                contact.action.substring(0, contact.action.indexOf('NewbieFlag' + 1)),
+            const msg = util.format("Failed to copy member since field for contact ID %s",
                 contact.args.data.Id);
             log.error(msg);
             callback(new Error(msg));
@@ -145,120 +143,45 @@ const processContacts = function(contacts, action) {
     if (actions.indexOf(action) < 0) {
         throw new Error(util.format("Unsupported action (%s)", action));
     }
-    // filter out extra records for Committee chairs, webmasters, etc.
-    const newbies = contacts.filter(function(contact) {
-        return contact.MembershipLevel.Name === 'Newcomer Member';
-    });
 
-    // This should match the results from the "Newbies since [specify] date]"
-    // saved search in WildApricot
-    log.info("%d contacts retrieved", newbies.length);
+    log.info("%d contacts retrieved", contacts.length);
 
-    // For each newbie
-    var newbieRecords = [];
-    for (var n = 0; n < newbies.length; n++) {
-        var newbie = newbies[n];
-        var memberSince = newbie.FieldValues.filter(function(field) {
+    // For each member
+    var memberRecords = [];
+    for (var m = 0; m < contacts.length; m++) {
+        var member = contacts[m];
+        var memberSince = member.FieldValues.filter(function(field) {
             return field.FieldName === 'Member since';
         })[0].Value;
         if (!_.isNil(memberSince)) {
             memberSince = memberSince.substring(0,10);
         }
-        const newbieFlag = newbie.FieldValues.filter(function(field) {
-            return field.FieldName === 'New member';
-        })[0].Value;
-        const newbieStatusSysCode = newbie.FieldValues.filter(function(field) {
-            return field.FieldName === 'New member';
-        })[0].SystemCode;
-        var newbieStatusUpd = newbie.FieldValues.filter(function(field) {
-            return field.FieldName === 'New member updated on';
-        })[0].Value;
-        if (!_.isNil(newbieStatusUpd)) {
-            newbieStatusUpd = newbieStatusUpd.substring(0,10);
-        }
-        const newbieStatusUpdSysCode = newbie.FieldValues.filter(function(field) {
-            return field.FieldName === 'New member updated on';
+        const MemberSinceReadOnlySysCode = member.FieldValues.filter(function(field) {
+            return field.FieldName === 'Member since readonly';
         })[0].SystemCode;
 
         var logMsg;
-        switch(action) {
-            case "setNewbieFlag":
-                // If the newbie flag isn't set yet, set it
-                if (_.isNil(newbieFlag) || newbieFlag.Label == "No") {
-                    const newbieUpdateArgs = {
-                        path: { accountId: config.accountId, contactId: newbie.Id.toString() },
-                        data: {
-                            "Id": newbie.Id,
-                            "FieldValues": [
-                                {
-                                    "FieldName": "New member",
-                                    "SystemCode": newbieStatusSysCode,
-                                    "Value": "Yes"
-                                },
-                                {
-                                    "FieldName": "New member updated on",
-                                    "SystemCode": newbieStatusUpdSysCode,
-                                    "Value": formatDate(new Date())
-                                }
-                            ]
-                        }
-                    };
-                    newbieRecords.push({
-                        args: newbieUpdateArgs,
-                        action: action,
-                        memberSince: memberSince,
-                        newbieStatusUpd: newbieStatusUpd
-                    });
-                } else {
-                    log.trace("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
-                        newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                        memberSince, newbieFlag.Label, (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
-                }
-                break;
-
-            case "clearNewbieFlag":
-                // If the newbie flag is set, clear it
-                if (!_.isNil(newbieFlag) && newbieFlag.Label == "Yes") {
-                    const memberUpdateArgs = {
-                        path: { accountId: config.accountId, contactId: newbie.Id.toString() },
-                        data: {
-                            "Id": newbie.Id,
-                            "FieldValues": [
-                                {
-                                    "FieldName": "New member",
-                                    "SystemCode": newbieStatusSysCode,
-                                    "Value": "No"
-                                },
-                                {
-                                    "FieldName": "New member updated on",
-                                    "SystemCode": newbieStatusUpdSysCode,
-                                    "Value": formatDate(new Date())
-                                }
-                            ]
-                        }
-                    };
-
-                    newbieRecords.push({
-                        args: memberUpdateArgs,
-                        action: action,
-                        memberSince: memberSince,
-                        newbieStatusUpd: newbieStatusUpd
-                    });
-                } else {
-                    log.debug("Newbie status for %s %s (ID: %s | status: %s | joined: %s) already set to '%s' on %s",
-                        newbie.FirstName, newbie.LastName, newbie.Id, newbie.Status,
-                        memberSince, (_.isNil(newbieFlag) || _.isNil(newbieFlag.Label) ? "NULL" : newbieFlag.Label),
-                        (_.isNil(newbieStatusUpd) ? "" : newbieStatusUpd));
-                }
-
-                break;
-
-            default:
-                log.warn("This should not happen -- requested action is '%s'", action);
-        }
+        const memberUpdateArgs = {
+            path: { accountId: config.accountId, contactId: member.Id.toString() },
+            data: {
+                "Id": member.Id,
+                "FieldValues": [
+                    {
+                        "FieldName": "Member since readonly",
+                        "SystemCode": MemberSinceReadOnlySysCode,
+                        "Value": memberSince
+                    }
+                ]
+            }
+        };
+        memberRecords.push({
+            args: memberUpdateArgs,
+            action: action,
+            memberSince: memberSince
+        });
     }
 
-    async.eachSeries(newbieRecords, processContact, function(err) {
+    async.eachSeries(memberRecords, processContact, function(err) {
         if (err) {
             //throw err;    // continue even if one update fails.
             log.error(err);
@@ -283,7 +206,7 @@ const processContacts = function(contacts, action) {
                     },
                     Subject: {
                         Charset: 'UTF-8',
-                        Data: 'Newbie Flag Database Update'
+                        Data: 'Copy Member Since Field'
                     }
                 },
                 Source: emailFrom,
@@ -310,8 +233,6 @@ const processContacts = function(contacts, action) {
             );
         }
     });
-
-    return processed;
 };
 
 /*****************
@@ -321,50 +242,21 @@ process.on('uncaughtException', (err) => {
     log.error(1, `${err}`);
 });
 
-// format date
-function formatDate(d) {
-    var month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-}
-
-// calculate today - 90 days for newbie status
-var today = new Date();
-today.setDate(today.getDate() - 90);
-todayMinus90 = today.toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
-
 /*******************************
  * set query filter parameters *
  *******************************/
-
-// newbies -- 1-90 days from join date
-const newbieArgs = {
-    path: { accountId: config.accountId },
-    parameters: {
-        $filter: /*"'Id' eq '47506410'" + " AND " +*/
-                 "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' gt " +
-                 todayMinus90
-
-    }
-};
 
 // members -- 91+ days since join date
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: /*"'Id' eq '47506410'" + " AND " +*/
-                 "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since' le " +
-                 todayMinus90
+        $filter: "'Id' eq '47506410'" /*+ " AND " +
+                 "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since readonly' eq NULL"
+                 */
     }
 };
 
 /***********
  * run it! *
  ***********/
-getContacts(newbieArgs, 'setNewbieFlag');
-getContacts(memberArgs, 'clearNewbieFlag');
+getContacts(memberArgs, 'copyMemberSince');
