@@ -1,4 +1,5 @@
 # sbnewcomers
+
 Repository for all projects by SB Newcomers Technology committee members
 
 ## Requirements
@@ -16,6 +17,7 @@ Repository for all projects by SB Newcomers Technology committee members
 ## Linux Setup
 
 1. Execute the following commands to install all prerequisites:
+
    ```bash
    yum install git
    git --version
@@ -27,6 +29,7 @@ Repository for all projects by SB Newcomers Technology committee members
    ```
 
 2. Execute the following commands:
+
    ```bash
    git clone https://github.com/rkiesler1/sbnewcomers.git
    cd sbnewcomers/shared
@@ -35,7 +38,8 @@ Repository for all projects by SB Newcomers Technology committee members
 
 3. Copy the file `.env_sample` to `.env`
 
-4. Edit the file `.env` and update with your SBNC login credentials
+4. Edit the file `.env` and update with your SBNC login credentials:
+
    ```ini
    wildapricot_user_id=<your_sbnc_user_id>
    wildapricot_password=<your_sbnc_password>
@@ -54,6 +58,7 @@ Repository for all projects by SB Newcomers Technology committee members
 5. Copy the file `aws_sample.json` to `aws.json`
 
 6. Edit the file `aws.json` and update with your AWS access key and secret key. If you need more assistance, contact the Technology Committee ([:email:](mailto:technology@sbnewcomers.org)).
+
    ```javascript
    {
       "accessKeyId": "<your_aws_access_key>",

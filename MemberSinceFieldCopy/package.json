@@ -1,0 +1,18 @@
+{
+  "name": "membersincefieldcopy",
+  "version": "1.0.0",
+  "description": "Copy the 'Member since' system field to a custom field",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Roy Kiesler",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.1",
+    "aws-sdk": "^2.326.0",
+    "bunyan": "^1.8.12",
+    "bunyan-rotating-file-stream": "^1.6.3",
+    "lodash": "^4.17.11"
+  }
+}

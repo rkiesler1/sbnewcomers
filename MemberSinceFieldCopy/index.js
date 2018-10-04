@@ -118,7 +118,7 @@ var errors = 0;
 /**************************
  * Update a member record *
  **************************/
-const processContact = function(contact, callback) {
+const processContact = function(contact, index, callback) {
     log.trace("Processing contact ID %s with action %", contact.args.data.Id, contact.action);
     apiClient.methods.updateContact(contact.args, function(contactDataUpd, response) {
         if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
@@ -181,7 +181,7 @@ const processContacts = function(contacts, action) {
         });
     }
 
-    async.eachSeries(memberRecords, processContact, function(err) {
+    async.eachOfSeries(memberRecords, processContact, function(err) {
         if (err) {
             //throw err;    // continue even if one update fails.
             log.error(err);
@@ -250,9 +250,9 @@ process.on('uncaughtException', (err) => {
 const memberArgs = {
     path: { accountId: config.accountId },
     parameters: {
-        $filter: "'Id' eq '47506410'" /*+ " AND " +
+        $filter: /*"'Id' eq '47506410'" /*+ " AND " +*/
                  "'Membership status' ne 'Lapsed' AND 'Membership status' ne 'PendingNew' AND 'Member since readonly' eq NULL"
-                 */
+
     }
 };
 
