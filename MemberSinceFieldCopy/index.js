@@ -10,8 +10,8 @@ const config = require(path.join(__dirname, '..', 'shared/config.js'));
 const wildapricot = require(path.join(__dirname, '..', 'shared/wildapricot.js'));
 
 // configure mail
-//const emailTo = "HelpDesk@sbnewcomers.org";
-const emailTo = "rkiesler@gmail.com";
+const emailTo = "HelpDesk@sbnewcomers.org";
+//const emailTo = "rkiesler@gmail.com";
 const emailFrom = "HelpDesk@sbnewcomers.org";
 
 // configure logging
