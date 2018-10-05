@@ -82,7 +82,10 @@ function getContacts(args, action) {
                 case "Complete":
                     // process results
                     if (!_.isNil(contactData.Contacts)) {
-                        if (_.isArray(contactData.Contacts) && contactData.Contacts.length > 0) {
+                        if (_.isArray(contactData.Contacts)) {
+                            log.trace("%d contacts retrieved", contactData.Contacts.length);
+                        }
+                        if (contactData.Contacts.length > 0) {
                             processContacts(contactData.Contacts, action);
                         }
                     } else {
@@ -119,19 +122,25 @@ var errors = 0;
  * Update a member record *
  **************************/
 const processContact = function(contact, index, callback) {
-    log.trace("Processing contact ID %s with action %", contact.args.data.Id, contact.action);
+    log.trace("%d >>> Processing contact ID %s with action %", index + 1, contact.args.data.Id, contact.action);
     apiClient.methods.updateContact(contact.args, function(contactDataUpd, response) {
         if (!_.isNil(contactDataUpd) && !_.isNil(contactDataUpd.Id)) {
             processed++;
-            log.info("Member since readonly field set for %s %s (ID: %s | status: %s | joined: %s)",
-                contactDataUpd.FirstName, contactDataUpd.LastName,
+            log.trace("%d >>> Member since readonly field set for %s %s (ID: %s | status: %s | joined: %s)",
+                index + 1, contactDataUpd.FirstName, contactDataUpd.LastName,
                 contactDataUpd.Id, contactDataUpd.Status, contact.memberSince);
-            callback();
+            setTimeout(function() {
+                callback();
+            }, 1000);
         } else {
-            const msg = util.format("Failed to copy member since field for contact ID %s",
-                contact.args.data.Id);
+            errors++;
+            const msg = util.format("%d >>> Failed to copy member since field for contact ID %s",
+                index + 1, contact.args.data.Id);
             log.error(msg);
-            callback(new Error(msg));
+            setTimeout(function() {
+                callback();
+                //callback(new Error(msg));
+            }, 1000);
         }
     });
 };
@@ -143,8 +152,6 @@ const processContacts = function(contacts, action) {
     if (actions.indexOf(action) < 0) {
         throw new Error(util.format("Unsupported action (%s)", action));
     }
-
-    log.info("%d contacts retrieved", contacts.length);
 
     // For each member
     var memberRecords = [];
@@ -181,58 +188,61 @@ const processContacts = function(contacts, action) {
         });
     }
 
-    async.eachOfSeries(memberRecords, processContact, function(err) {
-        if (err) {
-            //throw err;    // continue even if one update fails.
-            log.error(err);
-        } else {
-            // Create sendEmail params
-            var params = {
-                Destination: {
-                    ToAddresses: [
-                        emailTo
-                    ]
-                },
-                Message: {
-                    Body: {
-                        Html: {
-                            Charset: "UTF-8",
-                            Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+    if (memberRecords.length > 0) {
+        async.eachOfSeries(memberRecords, processContact, function(err) {
+            if (err) {
+                //throw err;    // continue even if one update fails.
+                log.error(err);
+            } else {
+                // Create sendEmail params
+                var params = {
+                    Destination: {
+                        ToAddresses: [
+                            emailTo
+                        ]
+                    },
+                    Message: {
+                        Body: {
+                            Html: {
+                                Charset: "UTF-8",
+                                Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+                            },
+                            Text: {
+                                Charset: "UTF-8",
+                                Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+                            }
                         },
-                        Text: {
-                            Charset: "UTF-8",
-                            Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+                        Subject: {
+                            Charset: 'UTF-8',
+                            Data: 'Copy Member Since Field'
                         }
                     },
-                    Subject: {
-                        Charset: 'UTF-8',
-                        Data: 'Copy Member Since Field'
+                    Source: emailFrom,
+                    ReplyToAddresses: [
+                        'no-reply@sbnewcomers.org'
+                    ]
+                };
+
+                // Create the promise and SES service object
+                var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+                log.info("%s completed for %d member%s with %d error%s",
+                    action, processed, (processed > 1 ? "s" : ""), errors, (errors == 1 ? "" : "s"));
+
+                // Handle promise's fulfilled/rejected states
+                sendPromise.then(
+                    function (data) {
+                        // reset counters
+                        processed = 0;
+                        errors = 0;
+                        //console.log(data.MessageId);
+                    }).catch(
+                    function (err) {
+                        console.error(err, err.stack);
                     }
-                },
-                Source: emailFrom,
-                ReplyToAddresses: [
-                    'no-reply@sbnewcomers.org'
-                ]
-            };
-
-            // Create the promise and SES service object
-            var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-            log.info("%s completed for %d member(s) with %d error(s)", action, processed, errors);
-
-            // Handle promise's fulfilled/rejected states
-            sendPromise.then(
-                function (data) {
-                    // reset counters
-                    processed = 0;
-                    errors = 0;
-                    //console.log(data.MessageId);
-                }).catch(
-                function (err) {
-                    console.error(err, err.stack);
-                }
-            );
-        }
-    });
+                );
+            }
+        });
+    }
 };
 
 /*****************
