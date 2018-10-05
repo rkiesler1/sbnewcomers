@@ -67,8 +67,12 @@ Repository for all projects by SB Newcomers Technology committee members
    }
    ```
 
-## Projects
+## Scripts
 
 * [Database Update for Newbies](./DatabaseUpdateNewbie) - A Node.js script that uses the WildApricot API to execute a daily query of members who joined in the past 90 days and set an appropriate flag in the members' database. The script also resets the newbie flag for all members with the flag who have been with SB Newcomers for more than 90 days.
 
 * [Member Since Field Copy](./MemberSinceFieldCopy) - A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
+
+## Scheduled Execution
+
+When using a task scheduler (e.g., `cron` on Linux) to execute scripts on a schedule, be mindful of the [WildApricot API limits](https://gethelp.wildapricot.com/en/articles/182#limits) which permit up to 60 calls per minute. Each individual script already takes that into account, but executing two or more scripts on an overlapping schedule will exceed the limits and result in API errors.
