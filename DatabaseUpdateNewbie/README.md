@@ -26,7 +26,8 @@ node index.js
 Add the following `cron` jobs to `/etc/cron.daily`:
 
 ```bash
-0 7 * * * cd /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie && ~/.nvm/versions/node/v8.12.0/bin/node /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie/index.js
+0 7 * * * cd /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie && \
+  ~/.nvm/versions/node/v8.12.0/bin/node /home/ec2-user/sbnewcomers/DatabaseUpdateNewbie/index.js
 ```
 
 ## Viewing the Log
