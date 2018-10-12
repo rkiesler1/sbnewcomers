@@ -205,11 +205,13 @@ const processContacts = function(contacts, action) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+                                Data: util.format("%s completed for %d member%s with %d error%s",
+                                    action, processed, (processed > 1 ? "s" : ""), errors, (errors == 1 ? "" : "s"))
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s completed for %d member(s) with %d error(s)", action, processed, errors)
+                                Data: util.format("%s completed for %d member%s with %d error%s",
+                                    action, processed, (processed > 1 ? "s" : ""), errors, (errors == 1 ? "" : "s"))
                             }
                         },
                         Subject: {
