@@ -24,7 +24,7 @@ if (!fs.existsSync(logsDir)) {
 const bunyan  = require('bunyan');
 const RotatingFileStream = require('bunyan-rotating-file-stream');
 var log = bunyan.createLogger({
-    name: 'wildapricot',
+    name: 'newbie_update',
     streams: [
         {
             stream: process.stderr,
@@ -91,8 +91,8 @@ function getContacts(args, action) {
                     } else {
                         // query complete -- get the results (an extra API call)
                         resId = contactData.ResultId;
-                        log.info("Request complete. Retrieving contacts with action %s ... (result ID: %s)",
-                            action, resId);
+                        log.info("Request complete (result ID: %s) -- retrieving contacts with action %s ...",
+                        resId, action);
                         var resArgs = _.clone(args);
                         resArgs.parameters = {resultId: resId};
                         setTimeout(getContacts, 1000, resArgs, action); // delay one more second...
@@ -105,7 +105,7 @@ function getContacts(args, action) {
                     break;
 
                 default:
-                    log.trace("This should not happen unless the API is changed -- retrned state is '%s'",
+                    log.trace("This should not happen unless the API is changed -- returned state is '%s'",
                         contactData.State);
             }
         }

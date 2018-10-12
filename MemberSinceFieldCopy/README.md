@@ -29,3 +29,19 @@ Add the following `cron` jobs to `/etc/cron.daily`:
 0 8 * * * cd /home/ec2-user/sbnewcomers/MemberSinceFieldCopy && \
   ~/.nvm/versions/node/v8.12.0/bin/node /home/ec2-user/sbnewcomers/MemberSinceFieldCopy/index.js
 ```
+
+## Viewing the Log
+
+To view the current log file, execute the following commands:
+
+On Mac/Linux
+
+```bash
+./node_modules/.bin/bunyan ./logs/member_since_copy.log -o short
+```
+
+On Windows
+
+```bash
+.\node_modules\.bin\bunyan .\logs\member_since_copy.log -o short
+```
