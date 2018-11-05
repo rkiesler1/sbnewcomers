@@ -1,0 +1,269 @@
+<!--
+    This code goes into a custom site page in Wild Apricot
+    See https://www.sbnewcomers.org/admin/website/?pageId=1765712
+-->
+<style type="text/css">
+    /***********************
+     * WildApricot buttons *
+     ***********************/
+    .waButtonContainer.defaultView {
+        width: 100px;
+        font-size: 14px;
+        font-family: Verdana, sans-serif;
+        padding-top: 5px;
+    }
+    .buttonName {
+        padding: 3px;
+        text-align: center;
+    }
+    .waButtonContainer.defaultView .buttonComponent.buttonColorGreen .buttonContainer .toolBarButton {
+        border-top: 1px solid #cddea3;
+        border-left: 1px solid #b5c787;
+        border-right: 1px solid #b5c787;
+        border-bottom: 1px solid #a0b46f;
+        -moz-border-radius: 4px;
+        -webkit-border-radius: 4px;
+        border-radius: 4px;
+        -moz-background-clip: padding;
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+        background-color: #6aa40d;
+        -moz-box-shadow: 0 1px 1px rgba(153,153,153,0.2),inset 0 1px 0 rgba(250,250,250,0.5);
+        -webkit-box-shadow: 0 1px 1px rgba(153,153,153,0.2),inset 0 1px 0 rgba(250,250,250,0.5);
+        box-shadow: 0 1px 1px rgba(153,153,153,0.2),inset 0 1px 0 rgba(250,250,250,0.5);
+        cursor: pointer;
+        background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiPjxsaW5lYXJHcmFkaWVudCBpZD0iaGF0MCIgZ3JhZGllbnRVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHgxPSI1MCUiIHkxPSIxMDAlIiB4Mj0iNTAlIiB5Mj0iLTEuNDIxMDg1NDcxNTIwMmUtMTQlIj4KPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2NkZTc4ZiIgc3RvcC1vcGFjaXR5PSIxIi8+CjxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2VmZmZjYyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgIDwvbGluZWFyR3JhZGllbnQ+Cgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCNoYXQwKSIgLz4KPC9zdmc+);
+        background-image: -moz-linear-gradient(bottom,#cde78f 0,#efffcc 100%);
+        background-image: -o-linear-gradient(bottom,#cde78f 0,#efffcc 100%);
+        background-image: -webkit-linear-gradient(bottom,#cde78f 0,#efffcc 100%);
+        background-image: linear-gradient(bottom,#cde78f 0,#efffcc 100%);
+        margin-left: 5px;
+    }
+    .textControlContainer {
+        padding-top: 15px
+    }
+    .textControlContainer:first-child {
+        padding-top: 0
+    }
+    .textContainer.multiLine {
+        display: inline-block
+    }
+    .textContainer.textSmall {
+        font-size: 12px;
+        line-height: 16px
+    }
+    .textGrey {
+        color: #999
+    }
+    input.eventNumber {
+        border-top: 1px solid #cdcdcd;
+        border-left: 1px solid #dedede;
+        border-right: 1px solid #dedede;
+        border-bottom: 1px solid #ebebeb;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+        border-radius: 2px;
+        cursor: text;
+        padding: 2px 0 2px 4px;
+        /*width: 100%;*/
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+        font-size: 12px;
+        font-weight: normal;
+        font-style: normal;
+        color: #2e2e2e;
+    }
+    .textContainer.titleText.textBlack {
+        font-weight: 600;
+    }
+    .screenShot {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+    }
+    .imgWrapper {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding-bottom: 20px;
+    }
+
+    /********************
+     * Animated spinner *
+     ********************/
+    .loading-spinner {
+      -webkit-animation-play-state: running;
+              animation-play-state: running;
+      opacity: 1;
+      position: relative;
+      height: 20vh;
+    }
+    .loading-spinner {
+      -webkit-animation-play-state: running;
+              animation-play-state: running;
+      opacity: 1;
+      position: relative;
+      height: 100px; /*20vh;*/
+    }
+    @-webkit-keyframes spinner {
+      0% {
+        -webkit-transform: translate3d(-50%, -50%, 0) rotate(0deg);
+                transform: translate3d(-50%, -50%, 0) rotate(0deg);
+      }
+      100% {
+        -webkit-transform: translate3d(-50%, -50%, 0) rotate(360deg);
+                transform: translate3d(-50%, -50%, 0) rotate(360deg);
+      }
+    }
+    @keyframes spinner {
+      0% {
+        -webkit-transform: translate3d(-50%, -50%, 0) rotate(0deg);
+                transform: translate3d(-50%, -50%, 0) rotate(0deg);
+      }
+      100% {
+        -webkit-transform: translate3d(-50%, -50%, 0) rotate(360deg);
+                transform: translate3d(-50%, -50%, 0) rotate(360deg);
+      }
+    }
+    .loading-spinner.-paused {
+      -webkit-animation-play-state: paused;
+              animation-play-state: paused;
+      opacity: 0.2;
+      transition: opacity linear 0.1s;
+    }
+    .loading-spinner::before {
+      -webkit-animation: 1.5s linear infinite spinner;
+              animation: 1.5s linear infinite spinner;
+      -webkit-animation-play-state: inherit;
+              animation-play-state: inherit;
+      border: solid 3px #dedede;
+      border-bottom-color: #EF6565;
+      border-radius: 50%;
+      content: "";
+      height: 40px;
+      left: 50%;
+      opacity: inherit;
+      position: absolute;
+      top: 50%;
+      -webkit-transform: translate3d(-50%, -50%, 0);
+              transform: translate3d(-50%, -50%, 0);
+      width: 40px;
+      will-change: transform;
+    }
+
+    /***********************
+     * Registration report *
+     **********************/
+    .em { color: #000; }
+    .checkin {
+        text-align: center;
+        vertical-align: middle;
+    }
+    p.newbie { text-align: center; }
+    h1, h2 {
+        text-align: center;
+        font-size: 0.9em;
+    }
+    table.eventRegReport {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    table.eventRegReport, table.eventRegReport td, table.eventRegReport th {
+        border: 1px solid;
+        border-collapse: collapse;
+        vertical-align: top;
+        font-size: 0.8em;
+    }
+    table.eventRegReport th {
+        text-align: left;
+        vertical-align: top;
+        padding: 5px;
+        border-right: none;
+        border-left: none;
+    }
+    .trans { border: none; }
+    table.eventRegReport td {
+        color: #777;
+        border-bottom: none;
+        border-right: none;
+        border-left: none;
+        padding: 5px;
+    }
+    table.eventRegReport tr:last-child td { border-bottom: 1px solid; }
+    table.eventRegReport tr:last-child td { border-right: none; }
+    table.eventRegReport td:last-child { border-left: none; }
+    table.eventRegReport tr.memo td { border-top: none; }
+    </style>
+    <!--script src="https://code.jquery.com/jquery-3.3.1.min.js" type="text/javascript"></script-->
+    <div id="eventRegReportTitle_textControlContainer" class="textControlContainer" style="padding-bottom: 5px;">
+        <div id="eventRegReportTitle_container" class="textContainer multiLine titleText textBlack">
+            <div class="textContainerContent">
+                <div id="eventRegReportTitle" class="text contentTypeText">Enter the ID number of the event for which you want to generate an attendee report:</div>
+            </div>
+        </div>
+    </div>
+    <form id="eventreg" action="https://rkdemo.ngrok.io/" method="post" enctype="application/x-www-form-urlencoded">
+        <table border="0">
+            <tr>
+                <td>
+                    <input class="eventNumber" type="number" name="eventId" value="">
+                </td>
+                <td>
+                    <div id="submitEventReg" class="waButtonContainer defaultView" onclick="$('#eventreg').submit()">
+                        <div class="buttonComponent buttonColorGreen">
+                            <div class="buttonContainer">
+                                <div id="submitEventReg_toolBarButton" class="toolBarButton">
+                                    <div class="waBarButtonText">
+                                        <div id="submitEventReg_buttonName" class="buttonName">Submit</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <div id="eventRegReport_textControlContainer" class="textControlContainer" style="padding-bottom: 5px;">
+        <div id="eventRegReport_container" class="textContainer multiLine titleText textGrey">
+            <div class="textContainerContent">
+                <div id="eventRegReport" class="text contentTypeText">You can locate the event ID in the event information page, as shown in the example below:</div>
+            </div>
+        </div>
+    </div>
+    <div class="imgWrapper">
+        <img class="screenShot" src="/resources/Pictures/Events/event_info.png" width="500"/>
+    </div>
+    <div class="loading-spinner"></div>
+    <div id="attendees"></div>
+    <script type="text/javascript">
+        $('#eventreg').submit(function() { // catch the form's submit event
+            $('#attendees').html("");
+            $('#attendees').css({
+                "border": "none"
+            });
+            $.ajax({ // create an AJAX call...
+                data: $(this).serialize(), // get the form data
+                type: $(this).attr('method'), // GET or POST
+                url: $(this).attr('action'), // the file to call
+                success: function(response) { // on success..
+                    $('#attendees').html(response); // update the DIV
+                    $('#attendees').css({
+                        "padding-bottom": "10px",
+                        "border": "1px solid #ccc"
+                    });
+                }
+            });
+            return false; // cancel original event to prevent form submitting
+        });
+        var $loading = $('.loading-spinner').hide();
+        $(document)
+            .ajaxStart(function () {
+                $loading.show();
+            })
+            .ajaxStop(function () {
+                $loading.hide();
+            });
+    </script>
