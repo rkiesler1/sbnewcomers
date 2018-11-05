@@ -57,13 +57,9 @@ var log = bunyan.createLogger({
     level : bunyan.TRACE
 });
 
-const tableTop = "<style>\n" +
-    "table, td, th {\n" +
-    "\tborder: 1px solid;\n" +
-    "\tborder-collapse: collapse;\n" +
-    "}\n" +
-    "th {text-align: left; vertical-align: top;}\n" +
-    "</style>\n" +
+const tableTop = "<link rel=\"stylesheet\" type=\"text/css\" href=\"event.css\">\n" +
+    "<h1>%s</h1>\n<h2>%s</h2>\n" +
+    "<p>&#x2605; - Newbie</p>\n" +
     "<table>\n" +
     "\t<tr>\n" +
     "\t\t<th>Check in</th>\n" +
@@ -141,10 +137,62 @@ function getContacts(args) {
     });
 }
 
+/********************
+ * Get invoice info *
+ ********************/
+function getInvoice(attendee, index, callback) {
+    var regType = attendee.RegistrationType.Name;
+
+    if (regType === "Board Members") {
+        // no need to get invoice -- free
+        log.trace("%s is a board member -- free", attendee.DisplayName);
+        if (callback) return callback();
+    } else {
+        if (attendee.RegistrationFee > 0 && attendee.PaidSum === attendee.RegistrationFee) {
+            // no need to get invoice -- paid
+            log.trace("%s already paid", attendee.DisplayName);
+            if (callback) return callback();
+        }
+    }
+
+    var invoice = attendee.Invoice;
+    if (!_.isNil(invoice)) {
+        var invoiceArgs = {
+            path: {
+                accountId: config.accountId,
+                invoiceId: invoice.Id
+            }
+        };
+        apiClient.methods.listInvoice(invoiceArgs, function(invoiceData, invResp) {
+            if (!_.isNil(invoiceData) && !_.isNil(invoiceData.DocumentNumber)) {
+                attendee.invoiceNumber = invoiceData.DocumentNumber;
+                const msg = util.format("%d) invoice #%s for %s (ID: %s)",
+                    index + 1, attendee.invoiceNumber, attendee.DisplayName, attendee.Id);
+                log.trace(msg);
+            } else {
+                const msg = util.format("%d) >>> Failed to get invoice info for %s (ID: %s)",
+                    index + 1, attendee.DisplayName, attendee.Id);
+                log.error(msg);
+            }
+            if (callback) {
+                setTimeout(function() {
+                    callback();
+                }, 1000);
+            }
+        });
+    } else {
+        const msg = util.format("%d) no invoice for %s (ID: %s)",
+        index + 1, attendee.DisplayName, attendee.Id);
+        log.trace(msg);
+        callback();
+    }
+}
+
 /*******************************
  * Get event registration info *
  *******************************/
 var attendees = [];
+var event;
 function getEventRegistrations(args) {
     const interval = 10000;
 
@@ -153,75 +201,109 @@ function getEventRegistrations(args) {
         if (!_.isNil(eventData) && _.isArray(eventData) && eventData.length > 0) {
             // good response -- get attendees
             attendees = _.map(eventData, "Contact");
+            event = _.map(eventData, "Event")[0];
             if (_.isArray(attendees) && attendees.length === eventData.length) {
                 // get IDs to pass into getContacts...
                 var ids = _.map(attendees, "Id");
                 const memberArgs = {
                     path: { accountId: config.accountId },
                     parameters: {
-                        $filter: "'Id' in [" + ids.toString() + "]"
+                        $filter: "'Id' in [" + ids.toString() + "]",
+                        $fields: "'First name','Last name','Membership status','Member since','New member',Member since readonly','Membership level','Role','Renewal due'"
                     }
                 };
 
                 getContacts(memberArgs);
 
+                var html;
                 var wait = setInterval(function() {
                     if (contacts.length === 0 && !done) {
-                        log.trace("Getting contact data...");
+                        log.trace("Getting contact info...");
                     } else {
-                        var html = tableTop;
-                        for (var i = 0; i < attendees.length; i++) {
-                            var attendee = eventData[i];
-                            var email = attendee.RegistrationFields.filter(function(field) {
-                                return field.FieldName === "e-Mail";
-                            })[0].Value.toLowerCase();
-                            var regType = attendee.RegistrationType.Name;
-                            var regFee = util.format("$%d.00", attendee.RegistrationFee);
-                            var df = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-                            var regDate = new Date(attendee.RegistrationDate).toLocaleTimeString("en-US", df);
-                            var invoice = attendee.Invoice;
-                            if (!_.isNil(invoice)) {
-                                var invoiceArgs = {
-                                    path: {
-                                        accountId: config.accountId,
-                                        invoiceId: invoice.Id
-                                    }
-                                };
-                                /*
-                                apiClient.methods.listInvoice(invoiceArgs, function(invoiceData, invResp) {
-                                    var row = "<tr>\n" +
-                                        "\t<td style='text-align: center;'>&#9634;</td>\n" + // checkin
-                                        "\t<td>" + attendee.DisplayName + "<br/><a href='mailto:" + email + "'>" + email + "</a></td>\n" +
-                                        "\t<td></td>\n" +
-                                        "\t<td><b>" + regType + " - " + regFee + "</b><br/>" + regDate +
-                                            "<br/>Invoice #" + invoiceData.DocumentNumber + "</td>\n" +
-                                        "\t<td></td>\n" +
-                                        "</tr>";
-                                    html += row;
-                                });
-                                */
-                                var contact = contacts.filter(function(contact){
-                                    return contact.Id === attendee.Contact.Id;
-                                })[0];
-                                var row = "<tr>\n" +
-                                    "\t<td style='text-align: center;'>&#9634;</td>\n" + // checkin
-                                    "\t<td>" + attendee.DisplayName + "<br/><a href='mailto:" + email + "'>" + email + "</a></td>\n" +
-                                    "\t<td>" + contact.Status + " member<br/>" + "</td>\n" +
-                                    "\t<td><b>" + regType + " - " + regFee + "</b><br/>" + regDate + "</td>\n" +
-                                    "\t<td></td>\n" +
-                                    "</tr>";
-                                html += row;
+                        // TODO: only get invoice if paid status is not "paid"
+                        // if no invoice set to "Free" othewise "Due"
+                        // call synchronously to avoid usage limits
+                        async.eachOfSeries(eventData, getInvoice, function(err) {
+                            if (err) {
+                                //throw err;    // continue even if one update fails.
+                                log.error(err);
+                            } else {
+                                // continue
+                                html = renderHtml(attendees, eventData);
                             }
-                        }
-                        html += tableBottom;
-                        console.log(html);
+                        });
+
                         clearInterval(wait);
                     }
                 }, 10000);
-
             }
         }
     });
+}
+
+function renderHtml(attendees, eventData) {
+    var html = tableTop;
+    var df = {year: 'numeric', month: 'short', day: 'numeric' };
+    var dtf = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+
+    for (var i = 0; i < attendees.length; i++) {
+        var attendee = eventData[i];
+        var email = attendee.RegistrationFields.filter(function(field) {
+            return field.FieldName === "e-Mail";
+        })[0].Value.toLowerCase();
+        var regType = attendee.RegistrationType.Name;
+        var regFee = util.format("$%d.00", attendee.RegistrationFee);
+        var paid = util.format("$%d.00", attendee.PaidSum);
+        var regDate = new Date(attendee.RegistrationDate).toLocaleTimeString("en-US", dtf);
+
+        var contact = contacts.filter(function(contact){
+            return contact.Id === attendee.Contact.Id;
+        })[0];
+        var newbieStatus = contact.FieldValues.filter(function(field) {
+            return field.FieldName === "New member";
+        });
+        if (!_.isNil(newbieStatus) && newbieStatus.length > 0) {
+            newbieStatus = newbieStatus[0];
+        } else {
+            newbieStatus = "No";
+        }
+        var renewDate = contact.FieldValues.filter(function(field) {
+            return field.FieldName === "Renewal due";
+        });
+        if (!_.isNil(renewDate) && renewDate.length > 0) {
+            renewDate = new Date(renewDate[0].Value).toLocaleDateString("en-US", df);
+        } else {
+            renewDate = "";
+        }
+        var paidStatus;
+        if (regType === "Board Members") {
+            paidStatus = "Free";
+        } else {
+            if (attendee.RegistrationFee > 0 && attendee.PaidSum === attendee.RegistrationFee) {
+                paidStatus = "Paid";
+            } else {
+                if (null == attendee.invoiceNumber || undefined == attendee.invoiceNumber) {
+                    paidStatus = "Free";
+                } else {
+                    paidStatus = "Due";
+                }
+            }
+        }
+        var row = "<tr>\n" +
+            "\t<td class=\"checkin\">&#9634;</td>\n" + // checkin
+            "\t<td>" + attendee.DisplayName + (!_.isNil(newbieStatus.Value) && newbieStatus.Value.Label === "Yes" ? "&nbsp;&#x2605;" : "") + "<br/><a href='mailto:" + email + "'>" + email + "</a></td>\n" +
+            "\t<td><span class=\"em\">" + contact.Status + " member</span><br/>" + renewDate + "<br/>" + contact.MembershipLevel.Name + "</td>\n" +
+            "\t<td nowrap=\"nowrap\"><span class=\"em\">" + regType + " - " + regFee + "</span><br/>" + regDate +
+                (attendee.invoiceNumber ? "<br/>Invoice #" + attendee.invoiceNumber : "") + "</td>\n" +
+            "\t<td>" + paidStatus + "</td>\n" +
+            "</tr>\n";
+        if (!_.isNil(attendee.Memo) && attendee.Memo.trim().length > 0) {
+            row += "<tr class=\"memo\"><td colspan=\"5\">Note:&nbsp;" + attendee.Memo + "</td></tr>\n";
+        }
+        html += row;
+    }
+    html += tableBottom;
+    console.log(util.format(html, event.Name, new Date(event.StartDate).toLocaleTimeString("en-US", dtf)));
 }
 
 /*****************
@@ -234,8 +316,6 @@ process.on('uncaughtException', (err) => {
 /************************
  * set query parameters *
  ************************/
-
-// members -- 91+ days since join date
 const eventArgs = {
     path: { accountId: config.accountId },
     parameters: {

@@ -12,7 +12,7 @@ const wildapricot = require(path.join(__dirname, '../..', 'shared/wildapricot.js
 
 // configure logging
 var fs = require('fs');
-var logsDir = path.join(__dirname, './logs');
+var logsDir = path.join(__dirname, '..', 'logs');
 
 if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir);
@@ -28,7 +28,7 @@ var log = bunyan.createLogger({
         },
         {
             stream: new RotatingFileStream({
-                path: path.join(__dirname, '.', 'logs/event_reg.log'),
+                path: path.join(__dirname, '..', 'logs/event_reg.log'),
                 period: '1d',          // daily rotation
                 totalFiles: 1000,      // keep up to 1000 back copies
                 rotateExisting: true,  // Give ourselves a clean file when we start up, based on period

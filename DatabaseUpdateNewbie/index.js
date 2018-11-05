@@ -130,9 +130,9 @@ const processContact = function(contact, index, callback) {
                 index + 1, (_.isNil(contact.newbieStatusUpd) ? "set" : "reset"),
                 contactDataUpd.FirstName, contactDataUpd.LastName,
                 contactDataUpd.Id, contactDataUpd.Status, contact.memberSince);
-                setTimeout(function() {
-                    callback();
-                }, 1000);
+            setTimeout(function() {
+                callback();
+            }, 1000);
         } else {
             errors++;
             const msg = util.format("%d >>> Failed to %s newbie update flag for contact ID %s",
