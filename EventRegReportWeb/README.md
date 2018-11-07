@@ -93,11 +93,11 @@ npm start
 
 7. Configure the security group of the EC2 instance to limit access to HTTP port 80 for access from WildApricot. In the example below, the address `34.226.77.200/32` corresponds to the `www.sbnewcomers.com` domain and `68.227.86.181/32` is Roy's home IP address (for testing).
 
-<kbd style="border: 1px solid; width: 600px;">![Express](/../screenshots/secgroup.png?raw=true "Express")</kbd>
+   <kbd style="border: 1px solid; width: 600px;">![Security Group](/../screenshots/secgroup.png?raw=true "Security Group")</kbd>
 
 8. Test the Web application by navigating to http://<hostname>.compute.amazonaws.com. You should be greated with a simple page:
 
-<kbd style="border: 1px solid; width: 600px;">![Express](/../screenshots/express.png?raw=true "Express")</kbd>
+   <kbd style="border: 1px solid; width: 600px;">![Express](/../screenshots/express.png?raw=true "Express")</kbd>
 
 ## Viewing the Log
 
