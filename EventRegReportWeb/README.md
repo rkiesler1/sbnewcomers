@@ -10,7 +10,7 @@ The form prompts the user to enter the event ID for which they want to generate 
 
 <kbd style="border: 1px solid; width: 400px;">![Web Form](/../screenshots/webform.png?raw=true "Web Form")</kbd>
 
-Hovering over the [sample]() link will pop up a helper image that shows where the user can get the ID number from.
+Hovering over the [example]() link will pop up a helper image that shows where the user can get the ID number from.
 
 <kbd style="border: 1px solid; width: 400px;">![Helper Popup](https://www.sbnewcomers.org/resources/Pictures/Events/event_info.png "Helper Popup")</kbd>
 
@@ -91,7 +91,9 @@ npm start
    pm2 start npm -- start
    ```
 
-7. Configure the security group of the EC2 instance to open HTTP port 80 for access from WildApricot.
+7. Configure the security group of the EC2 instance to limit access to HTTP port 80 for access from WildApricot. In the example below, the address `34.226.77.200/32` corresponds to the `www.sbnewcomers.com` domain and `68.227.86.181/32` is Roy's home IP address (for testing).
+
+<kbd style="border: 1px solid; width: 600px;">![Express](/../screenshots/secgroup.png?raw=true "Express")</kbd>
 
 8. Test the Web application by navigating to http://<hostname>.compute.amazonaws.com. You should be greated with a simple page:
 
