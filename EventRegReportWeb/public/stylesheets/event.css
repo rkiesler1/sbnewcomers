@@ -28,11 +28,17 @@ table.eventRegReport {
     margin-right: auto;
 }
 
-table.eventRegReport, table.eventRegReport td, table.eventRegReport th {
+table.eventRegReport, table.eventRegReport th, table.eventRegReport td  {
     border: 1px solid;
     border-collapse: collapse;
     vertical-align: top;
+}
+
+table.eventRegReport, table.eventRegReport th {
     font-size: 0.8em;
+}
+table.eventRegReport, table.eventRegReport td {
+    font-size: 0.9em;
 }
 
 table.eventRegReport th {

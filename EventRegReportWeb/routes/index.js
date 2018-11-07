@@ -1,8 +1,14 @@
 /*jshint esversion: 6 */
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router  = express.Router();
+const cors    = require('cors');
 
-const _    = require('lodash');
+var corsOptions = {
+    origin: 'https://www.sbnewcomers.org',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+const _        = require('lodash');
 const async    = require('async');
 const path     = require('path');
 const util     = require('util');
@@ -76,7 +82,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* POST event registration report page. */
-router.post('/', function(req, res, next) {
+router.post('/', cors(corsOptions), function(req, res, next) {
 
     /************************
      * Global error handler *
@@ -115,7 +121,7 @@ router.post('/', function(req, res, next) {
     var contacts = [];
     var done = false;
     function getContacts(args) {
-        const interval = 10000;
+        const interval = 2000;
 
         // send the newbie query to the API
         apiClient.methods.listContacts(args, function(contactData, response) {
@@ -262,12 +268,20 @@ router.post('/', function(req, res, next) {
                         }
                     }, 10000);
                 }
+            } else {
+                errorMsg = util.format("Invalid eventId parameter (%s)", args.parameters.eventId);
+                res.render('event', {
+                    title: 'SBNC Event Registration Report',
+                    error: errorMsg
+                });
+                return;
             }
         });
     }
 
     function renderHtml(attendees, eventData) {
         var displayAttendees = [];
+        var waitlist = [];
         var df = {year: 'numeric', month: 'short', day: 'numeric' };
         var dtf = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
 
@@ -306,7 +320,9 @@ router.post('/', function(req, res, next) {
             if (regType === "Board Members") {
                 paidStatus = "Free";
             } else {
-                if (attendee.RegistrationFee > 0 && attendee.PaidSum === attendee.RegistrationFee) {
+                if (attendee.OnWaitlist == true) {
+                    paidStatus = "Pending";
+                } else if (attendee.RegistrationFee > 0 && attendee.PaidSum === attendee.RegistrationFee) {
                     paidStatus = "Paid";
                 } else {
                     if (null == attendee.invoiceNumber || undefined == attendee.invoiceNumber) {
@@ -321,16 +337,13 @@ router.post('/', function(req, res, next) {
             attendee.regType = regType;
             attendee.regFee = regFee;
             attendee.regDate = regDate;
-            /*
-                "\t<td nowrap=\"nowrap\"><span class=\"em\">" + regType + " - " + regFee + "</span><br/>" + regDate +
-                    (attendee.invoiceNumber ? "<br/>Invoice #" + attendee.invoiceNumber : "") + "</td>\n" +
-                "\t<td>" + paidStatus + "</td>\n" +
-                "</tr>\n";
-            if (!_.isNil(attendee.Memo) && attendee.Memo.trim().length > 0) {
-                row += "<tr class=\"memo\"><td colspan=\"5\">Note:&nbsp;" + attendee.Memo + "</td></tr>\n";
+
+            if (attendee.OnWaitlist == true) {
+                log.info(">>>> %s is on the waitlist", attendee.DisplayName);
+                waitlist.push(attendee);
+            } else {
+                displayAttendees.push(attendee);
             }
-            html += row;*/
-            displayAttendees.push(attendee);
         }
 
         // test
@@ -350,7 +363,8 @@ router.post('/', function(req, res, next) {
             title: 'SBNC Event Registration Report',
             eventName: event.Name,
             eventDate: new Date(event.StartDate).toLocaleTimeString("en-US", dtf),
-            attendees: displayAttendees
+            attendees: displayAttendees,
+            waitlist: waitlist
         });
     }
 
@@ -362,7 +376,8 @@ router.post('/', function(req, res, next) {
         const eventArgs = {
             path: { accountId: config.accountId },
             parameters: {
-                eventId: req.body.eventId
+                eventId: req.body.eventId,
+                includeWaitList: true
             }
         };
 
