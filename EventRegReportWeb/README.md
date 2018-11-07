@@ -4,7 +4,7 @@ A Node.js Web application that uses the WildApricot API to generate a new event 
 
 The application is invoked from a simple Web form that was added to the Chairs Area. To display the form, click the CHAIRS AREA &#187; NEW EVENT REGISTRATION REPORT menu.
 
-<kbd style="border: 1px solid; width: 300px;">![New Event Registration Report](/../screenshots/menu.png?raw=true "New Event Registration Report")</kbd>
+<kbd style="border: 1px solid; width: 300px !important;">![New Event Registration Report](/../screenshots/menu.png?raw=true "New Event Registration Report")</kbd>
 
 The form prompts the user to enter the event ID for which they want to generate the report for.
 
