@@ -72,10 +72,11 @@ npm start
    }
    ```
 
-4. Start NGINX
+4. Start NGINX and configure to start on boot
 
    ```bash
    sudo /etc/init.d/nginx start
+   sudo chkconfig nginx on
    ```
 
 5. Install the PM2 process manager
