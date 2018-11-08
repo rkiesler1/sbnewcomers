@@ -4,7 +4,7 @@ const router  = express.Router();
 const cors    = require('cors');
 
 var corsOptions = {
-    origin: 'https://www.sbnewcomers.org',
+    origin: ['https://www.sbnewcomers.org', 'https://sbnewcomers.org'],
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
