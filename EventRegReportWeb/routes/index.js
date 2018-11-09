@@ -282,8 +282,20 @@ router.post('/', cors(corsOptions), function(req, res, next) {
     function renderHtml(attendees, eventData) {
         var displayAttendees = [];
         var waitlist = [];
-        var df = {year: 'numeric', month: 'short', day: 'numeric' };
-        var dtf = {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+        var df = {
+            timeZone:'America/Los_Angeles',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        };
+        var dtf = {
+            timeZone:'America/Los_Angeles',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+        };
 
         for (var i = 0; i < attendees.length; i++) {
             var attendee = eventData[i];
