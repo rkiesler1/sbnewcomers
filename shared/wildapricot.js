@@ -110,8 +110,11 @@ function registerClientMethods() {
     client.registerMethod('listContact',   baseURL + '/accounts/${accountId}/contacts/${contactId}', 'GET');
     client.registerMethod('updateContact', baseURL + '/accounts/${accountId}/contacts/${contactId}', 'PUT');
 
-    // Event: https://api.wildapricot.org/v2.1/accounts/:accountId/eventregistrations?eventId=:eventId
+    // Event registrations: https://api.wildapricot.org/v2.1/accounts/:accountId/eventregistrations?eventId=:eventId
     client.registerMethod('listEventRegs', baseURL + '/accounts/${accountId}/eventregistrations', 'GET');
+
+    // Event: https://api.wildapricot.org/v2.1/accounts/:accountId/events?eventId=:eventId
+    client.registerMethod('listEvents', baseURL + '/accounts/${accountId}/events', 'GET');
 
     // Invoice: https://api.wildapricot.org/v2.1/accounts/:accountId/Invoices/:invoiceId",
     client.registerMethod('listInvoice', baseURL + '/accounts/${accountId}/Invoices/${invoiceId}', 'GET');
