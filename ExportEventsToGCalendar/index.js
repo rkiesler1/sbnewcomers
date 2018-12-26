@@ -62,6 +62,7 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar']; // .readonly
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'token.json';
+const gCalId = "fkc3554e0seasao9spvukslp14@group.calendar.google.com"; // primary
 
 // Load client secrets from a local file.
 fs.readFile(path.join(__dirname, '.', 'credentials.json'), (err, content) => {
@@ -125,7 +126,7 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 /**
- * Lists the next 10 events on the user's primary calendar.
+ * Export all public SBNC events starting today to the specified calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function exportEvents(auth) {
@@ -193,7 +194,7 @@ function exportEvents(auth) {
                                 }
                                 calendar.events.patch({
                                     auth: auth,
-                                    calendarId: 'primary',
+                                    calendarId: gCalId,
                                     eventId: gEvent.id,
                                     resource: gEvent,
                                 }, eventUpdateHandler);
@@ -232,7 +233,7 @@ function exportEvents(auth) {
 
                         calendar.events.insert({
                             auth: auth,
-                            calendarId: 'primary',
+                            calendarId: gCalId,
                             resource: gEvent,
                         }, eventCreateHandler);
                     }
@@ -292,7 +293,7 @@ function ruleFromSessions(sessions) {
 function findEvent(calendar, eventId) {
     var results = null;
     calendar.events.list({
-        calendarId: 'primary',
+        calendarId: gCalId,
         timeMin: (new Date()).toISOString(),
         q: util.format('(%d)', eventId),
     }, (err, res) => {
