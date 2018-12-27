@@ -62,7 +62,7 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar']; // .readonly
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'token.json';
-const gCalId = "fkc3554e0seasao9spvukslp14@group.calendar.google.com"; // primary
+const gCalId = "4osqerqh478ea76dgd3harcins@group.calendar.google.com"; // primary
 
 // Load client secrets from a local file.
 fs.readFile(path.join(__dirname, '.', 'credentials.json'), (err, content) => {
