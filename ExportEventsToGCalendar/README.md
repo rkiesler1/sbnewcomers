@@ -2,7 +2,7 @@
 
 A Node.js script that uses the WildApricot and Google Calendar APIs to export events from WildApricot to a Google Calendar that anyone with a Google account can subscribe to and see SBNC events on any Google connected device.
 
-<kbd style="border: 1px solid; width: 300px;">![Exported Event](/../screenshots/mobile_cal.png?raw=true "Exported Event")</kbd>
+<kbd style="border: 1px solid; width: 300px;">![Exported Event](/../screenshots/mobile_cal.jpg?raw=true "Exported Event")</kbd>
 
 Each event includes name, location, and a link to the event page on the SBNC website. Daily and weekly recurring events are also supported.
 
