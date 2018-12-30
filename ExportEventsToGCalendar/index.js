@@ -1,16 +1,25 @@
 /*jshint esversion: 6 */
+const _        = require('lodash');
+const aws      = require('aws-sdk');
 const deasync  = require('deasync');
 const fs       = require('fs');
-const _        = require('lodash');
 const path     = require('path');
 const util     = require('util');
 const readline = require('readline');
+
 const {
     google
 } = require('googleapis');
 
+aws.config.loadFromPath(path.join(__dirname, '..', 'shared/aws.json'));
 const config = require(path.join(__dirname, '..', 'shared/config.js'));
 const wildapricot = require(path.join(__dirname, '..', 'shared/wildapricot.js'));
+
+// configure mail
+const emailTo = "rkiesler@gmail.com";
+const emailFrom = "rkiesler@gmail.com";
+//const emailTo = "HelpDesk@sbnewcomers.org";
+//const emailFrom = "HelpDesk@sbnewcomers.org";
 
 // configure logging
 var logsDir = path.join(__dirname, './logs');
@@ -42,6 +51,10 @@ var log = bunyan.createLogger({
     ],
     level : bunyan.TRACE
 });
+
+var eventsAdded = 0;
+var eventsUpdateded = 0;
+var errors = 0;
 
 /*****************************
  * initialize the API client *
@@ -241,6 +254,62 @@ function exportEvents(auth) {
                     const msg = util.format("Ignoring event %d with access level '%s'", eventId, event.AccessLevel);
                     log.trace(msg);
                 }
+            } // end for
+            if ((eventsAdded + eventsUpdateded + errors) > 0) {
+                // Create sendEmail params
+                var params = {
+                    Destination: {
+                        ToAddresses: [
+                            emailTo
+                        ]
+                    },
+                    Message: {
+                        Body: {
+                            Html: {
+                                Charset: "UTF-8",
+                                Data: util.format("%d event%s created and %d event%s updated with %d error%s",
+                                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
+                                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
+                                    errors, (errors === 1 ? "" : "s"))
+                            },
+                            Text: {
+                                Charset: "UTF-8",
+                                Data: util.format("%d event%s created and %d event%s updated with %d error%s",
+                                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
+                                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
+                                    errors, (errors === 1 ? "" : "s"))
+                            }
+                        },
+                        Subject: {
+                            Charset: 'UTF-8',
+                            Data: 'Google Calendar Sync'
+                        }
+                    },
+                    Source: emailFrom,
+                    ReplyToAddresses: [
+                        'no-reply@sbnewcomers.org'
+                    ]
+                };
+
+                // Create the promise and SES service object
+                var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
+                log.info(util.format("%d event%s created and %d event%s updated with %d error%s",
+                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
+                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
+                    errors, (errors === 1 ? "" : "s")));
+
+                // Handle promise's fulfilled/rejected states
+                sendPromise.then(
+                    function (data) {
+                        // reset counters
+                        processed = 0;
+                        errors = 0;
+                        //console.log(data.MessageId);
+                    }).catch(
+                    function (err) {
+                        console.error(err, err.stack);
+                    }
+                );
             }
         } else {
             log.error("listEvents returned no data");
@@ -301,7 +370,7 @@ function findEvent(calendar, eventId) {
         results = res.data.items;
         if (results.length > 1) {
             const msg = util.format("Duplicate events for event ID %d", eventId);
-            log.warn(msg);
+            return log.error(msg);
         }
     });
     while (null == results) {deasync.sleep(100);}
@@ -318,16 +387,20 @@ function eventFindHandler(err, event) {
 
 function eventCreateHandler(err, event) {
     if (err) {
+        errors++;
         log.error('Error creating event in the calendar: ' + err);
         return;
     }
+    eventsAdded++;
     log.info('Event created: %s', event.data.summary);
 }
 
 function eventUpdateHandler(err, event) {
     if (err) {
+        errors++;
         log.error('Error updating the calendar: ' + err);
         return;
     }
+    eventsUpdateded++;
     log.info('Event updated: %s', event.data.summary);
 }
