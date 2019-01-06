@@ -52,8 +52,8 @@ var log = bunyan.createLogger({
     level : bunyan.TRACE
 });
 
-var eventsAdded = 0;
-var eventsUpdateded = 0;
+var eventsAdded = [];
+var eventsUpdated = [];
 var errors = 0;
 
 /*****************************
@@ -155,9 +155,10 @@ function exportEvents(auth) {
         if (!_.isNil(eventData) && !_.isNil(eventData.Events) &&
              _.isArray(eventData.Events) && eventData.Events.length > 0) {
             var events = eventData.Events;
+            var eventId;
             for (var i = 0; i < events.length; i++) {
                 var event = events[i];
-                var eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
+                eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
                 if (!_.isNil(event.AccessLevel) && event.AccessLevel === "Public")
                 {
                     var rule = null;
@@ -179,6 +180,7 @@ function exportEvents(auth) {
                     var start, end;
                     if (!_.isNil(gEvent) && gEvent.summary === eventName) {
                         // existing -- did the dates change?
+                        log.trace(util.format("Found event \"%s\"", eventName));
                         if (gEvent.start.dateTime === event.StartDate &&
                             gEvent.end.dateTime === event.EndDate) {
                                 // unchanged
@@ -255,7 +257,21 @@ function exportEvents(auth) {
                     log.trace(msg);
                 }
             } // end for
-            if ((eventsAdded + eventsUpdateded + errors) > 0) {
+            if ((eventsAdded.length + eventsUpdated.length + errors) > 0) {
+                var htmlMsg = util.format("<p>%d event%s created and %d event%s updated with %d error%s</p>",
+                    eventsAdded.length, (eventsAdded.length === 1 ? "" : "s"),
+                    eventsUpdated.length, (eventsUpdated.length === 1 ? "" : "s"),
+                    errors, (errors === 1 ? "" : "s")) + "<ul>";
+                for (var li = 0; li < eventsAdded.length; li++) {
+                    htmlMsg += util.format("<li>%s</li>", eventsAdded[li]);
+                }
+                htmlMsg += "</ul>";
+
+                var textMsg = util.format("%d event%s created and %d event%s updated with %d error%s",
+                    eventsAdded.length, (eventsAdded.length === 1 ? "" : "s"),
+                    eventsUpdated.length, (eventsUpdated.length === 1 ? "" : "s"),
+                    errors, (errors === 1 ? "" : "s"));
+
                 // Create sendEmail params
                 var params = {
                     Destination: {
@@ -267,17 +283,11 @@ function exportEvents(auth) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("%d event%s created and %d event%s updated with %d error%s",
-                                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
-                                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
-                                    errors, (errors === 1 ? "" : "s"))
+                                Data: htmlMsg
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("%d event%s created and %d event%s updated with %d error%s",
-                                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
-                                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
-                                    errors, (errors === 1 ? "" : "s"))
+                                Data: textMsg
                             }
                         },
                         Subject: {
@@ -293,10 +303,7 @@ function exportEvents(auth) {
 
                 // Create the promise and SES service object
                 var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-                log.info(util.format("%d event%s created and %d event%s updated with %d error%s",
-                    eventsAdded, (eventsAdded === 1 ? "" : "s"),
-                    eventsUpdateded, (eventsUpdateded === 1 ? "" : "s"),
-                    errors, (errors === 1 ? "" : "s")));
+                log.info(textMsg);
 
                 // Handle promise's fulfilled/rejected states
                 sendPromise.then(
@@ -391,7 +398,7 @@ function eventCreateHandler(err, event) {
         log.error('Error creating event in the calendar: ' + err);
         return;
     }
-    eventsAdded++;
+    eventsAdded.push(event.data.summary);
     log.info('Event created: %s', event.data.summary);
 }
 
@@ -401,6 +408,6 @@ function eventUpdateHandler(err, event) {
         log.error('Error updating the calendar: ' + err);
         return;
     }
-    eventsUpdateded++;
+    eventsUpdated.push(event.data.summary);
     log.info('Event updated: %s', event.data.summary);
 }
