@@ -159,7 +159,8 @@ function exportEvents(auth) {
             for (var i = 0; i < events.length; i++) {
                 var event = events[i];
                 eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
-                if (!_.isNil(event.AccessLevel) && event.AccessLevel === "Public")
+                if (!_.isNil(event.AccessLevel) &&
+                    (event.AccessLevel === "Public" || event.AccessLevel === "Restricted"))
                 {
                     var rule = null;
                     if (!_.isNil(event.Sessions) && _.isArray(event.Sessions) && event.Sessions.length > 0) {
