@@ -264,7 +264,10 @@ function exportEvents(auth) {
                     eventsUpdated.length, (eventsUpdated.length === 1 ? "" : "s"),
                     errors, (errors === 1 ? "" : "s")) + "<ul>";
                 for (var li = 0; li < eventsAdded.length; li++) {
-                    htmlMsg += util.format("<li>%s</li>", eventsAdded[li]);
+                    htmlMsg += util.format("<li>Added: %s</li>", eventsAdded[li]);
+                }
+                for (li = 0; li < eventsUpdated.length; li++) {
+                    htmlMsg += util.format("<li>Updated: %s</li>", eventsUpdated[li]);
                 }
                 htmlMsg += "</ul>";
 

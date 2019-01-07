@@ -1,0 +1,82 @@
+<style>
+    .tooltip-wrapper {
+        height: 370px;
+        width: 680px;
+        background: transparent url("./popup_bg.png") top left no-repeat;
+        display: none;
+        overflow: hidden;
+        position: absolute;
+        top: 100px;
+        z-index: 999;
+    }
+    .tooltip {
+        background: transparent url("./popup_bg.png") top left no-repeat;
+        display:table-cell;
+        vertical-align: middle;
+        padding-left: 50px;
+        padding-right: 50px;
+        font-family: Roboto,Helvetica,Arial,sans-serif;
+    }
+    .link {
+        width: 100%;
+        height: 50px;
+        resize: none;
+        font-size: 1em;
+    }
+    .button {
+        background: #1a73e8;
+        color: #fff;
+        border-radius: 4px;
+        padding: 5px 10px 5px 10px;
+        white-space: pre;
+    }
+    li {
+        margin-top: 10px;
+    }
+    #mouseOver {
+        display: inline;
+        position: relative;
+        float: right;
+    }
+    #close {
+        float: right;
+        padding: 0 5px 0 5px;
+        margin: -20px -20px 0 0;
+        background: #ccc;
+        cursor: pointer;
+        border: 1px solid;
+        border-radius: 3px;
+    }
+</style>
+<span id="mouseOver" onclick="togglePopup()">
+    <a>Add to my calendar</a>
+</span>
+<div class="tooltip-wrapper">
+    <div class="tooltip">
+        <span id="close" onclick="togglePopup()">𝗫</span>
+        <h3>Import events into Google Calendar</h3>
+        <ol>
+            <li>Open <a href="https://calendar.google.com/">Google Calendar</a></li>
+            <li>In the top right, click <b>Settings</b> ⚙️</li>
+            <li>Click the <b>From URL</b> option from the <b>Add calendar</b> menu</li>
+            <li>Copy the link below and paste it into the <b>URL of calendar</b> field</li>
+            <li>Click the <span class="button">Add Calendar</span> button</li>
+        </ol>
+        <textarea id="link" class="link" readonly >https://calendar.google.com/calendar/ical/4osqerqh478ea76dgd3harcins%40group.calendar.google.com/public/basic.ics</textarea>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+$("#link").click(function(){
+    $("#link").select();
+    document.execCommand('copy');
+});
+function togglePopup() {
+    var display = $(".tooltip-wrapper").css("display");
+    $(".tooltip-wrapper").css("display", display == "none" ? "table" : "none");
+    display = $(".tooltip-wrapper").css("display");
+    $(".tooltip-wrapper").css("height", display == "table" ? "370px" : "0px");
+    $(".tooltip-wrapper").css("width", display == "table" ? "680px" : "0px");
+    $(".tooltip-wrapper").parent().css("height", display == "table" ? "370px" : "0px");
+}
+</script>
