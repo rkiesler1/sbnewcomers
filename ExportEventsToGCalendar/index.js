@@ -179,14 +179,15 @@ function exportEvents(auth) {
                     var eventName = util.format("%s (%d)", event.Name, eventId);
                     var gEvent = findEvent(calendar, eventId);
                     var start, end;
-                    if (!_.isNil(gEvent) && gEvent.summary === eventName) {
-                        // existing -- did the dates change?
-                        log.trace(util.format("Found event \"%s\"", eventName));
-                        if (gEvent.start.dateTime === event.StartDate &&
+                    if (!_.isNil(gEvent) && (gEvent.summary === eventName ||
+                                             gEvent.summary.includes(eventId))) {
+                        log.info(util.format("Found event \"%s\"", gEvent.summary));
+                        // existing -- did the name change or did the dates change?
+                        if (gEvent.summary === eventName && gEvent.start.dateTime === event.StartDate &&
                             gEvent.end.dateTime === event.EndDate) {
-                                // unchanged
-                                const msg = util.format("Skipping unchanged event %s", eventName);
-                                log.info(msg);
+                            // unchanged
+                            const msg = util.format("Skipping unchanged event %s", eventName);
+                            log.info(msg);
                         } else {
                             // special case -- recurring event (since we changed the end date)
                             if (!_.isNil(rule) && gEvent.start.dateTime === event.StartDate &&
@@ -196,6 +197,7 @@ function exportEvents(auth) {
                             } else {
                                 const msg = util.format("Updating event %s", eventName);
                                 log.info(msg);
+                                gEvent.summary = eventName;
                                 gEvent.start.dateTime = event.StartDate;
                                 gEvent.end.dateTime = event.EndDate;
                                 if (!_.isNil(rule)) {
