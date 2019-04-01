@@ -266,7 +266,7 @@ router.post('/', cors(corsOptions), function(req, res, next) {
 
                             clearInterval(wait);
                         }
-                    }, 10000);
+                    }, interval);
                 }
             } else {
                 errorMsg = util.format("Invalid eventId parameter (%s)", args.parameters.eventId);
