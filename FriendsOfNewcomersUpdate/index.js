@@ -207,12 +207,12 @@ const processContact = function(contact, index, callback) {
                 });
             } else {
                 skipped++;
-                log.trace("Skipping update for %s %s (contact ID: %s)", contact.firstName, contact.lastName, contact.args.data.Id);
+                log.trace("Skipping update for %s %s (contact ID: %s)", contact.firstName, contact.lastName, contact.id);
                 callback();
             }
         } else {
             skipped++;
-            log.trace("No event registrations for %s %s (contact ID: %s)", contact.firstName, contact.lastName, contact.args.data.Id);
+            log.trace("No event registrations for %s %s (contact ID: %s)", contact.firstName, contact.lastName, contact.id);
             callback();
         }
     });
