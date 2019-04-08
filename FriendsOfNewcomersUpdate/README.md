@@ -26,7 +26,11 @@ node index.js
 Add the following `cron` jobs to `/etc/cron.daily`:
 
 ```bash
+<<<<<<< HEAD
 30 7 * * * cd /home/ec2-user/sbnewcomers/FriendsOfNewcomersUpdate && \
+=======
+0 8 * * * cd /home/ec2-user/sbnewcomers/FriendsOfNewcomersUpdate && \
+>>>>>>> 0eb5976e7364fcadf673128726a16aa9330222e7
   ~/.nvm/versions/node/v8.12.0/bin/node /home/ec2-user/sbnewcomers/FriendsOfNewcomersUpdate/index.js
 ```
 

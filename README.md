@@ -4,7 +4,7 @@ Repository for all projects by SB Newcomers Technology committee members
 
 ## Requirements
 
-* [Node.js](https://nodejs.org/en/download/) v8.12.0 or later
+* [Node.js](https://nodejs.org/en/download/) v10.5.3 or later
 * NPM v6.4.1 or later
 * [Python](https://www.python.org/downloads/) 2.7.15 or later
 * Git v2.14 or later
@@ -23,7 +23,8 @@ Repository for all projects by SB Newcomers Technology committee members
    git --version
    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.0/install.sh | bash
    . ~/.nvm/nvm.sh
-   nvm install 8.12.0
+   nvm install 10.5.3
+   npm install -g npm@latest
    node -v
    npm -v
    ```
