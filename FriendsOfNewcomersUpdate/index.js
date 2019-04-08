@@ -165,7 +165,6 @@ const processContact = function(contact, index, callback) {
              ******************/
 
             if (latestRegDate > renewalDate) {
-                updated++;
                 log.trace("%d >>> Updating renewal date to %s for %s %s (contact ID: %s)", updated,
                 formatDate(latestRegDate), contact.firstName, contact.lastName, contact.id);
 
