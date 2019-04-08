@@ -390,14 +390,6 @@ function findEvent(calendar, eventId) {
     return results[0];
 }
 
-function eventFindHandler(err, event) {
-    if (err) {
-        log.error('Error finding event in the calendar: ' + err);
-        return;
-    }
-    log.trace('Event found: %s', event.data.summary);
-}
-
 function eventCreateHandler(err, event) {
     if (err) {
         errors++;
@@ -417,3 +409,10 @@ function eventUpdateHandler(err, event) {
     eventsUpdated.push(event.data.summary);
     log.info('Event updated: %s', event.data.summary);
 }
+
+/*****************
+ * Error handler *
+ *****************/
+process.on('uncaughtException', (err) => {
+    log.error(1, `${err}`);
+});
