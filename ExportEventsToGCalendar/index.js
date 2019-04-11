@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 const _        = require('lodash');
 const aws      = require('aws-sdk');
+const async    = require('async');
 const deasync  = require('deasync');
 const fs       = require('fs');
 const path     = require('path');
@@ -54,6 +55,7 @@ var log = bunyan.createLogger({
 
 var eventsAdded = [];
 var eventsUpdated = [];
+var eventsDeleted = [];
 var errors = 0;
 
 /*****************************
@@ -154,8 +156,16 @@ function exportEvents(auth) {
     apiClient.methods.listEvents(eventArgs, function(eventData, eventResp) {
         if (!_.isNil(eventData) && !_.isNil(eventData.Events) &&
              _.isArray(eventData.Events) && eventData.Events.length > 0) {
+
             var events = eventData.Events;
             var eventId;
+
+            // connect to Google calendar
+            const calendar = google.calendar({
+                version: 'v3',
+                auth
+            });
+
             for (var i = 0; i < events.length; i++) {
                 var event = events[i];
                 eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
@@ -169,11 +179,6 @@ function exportEvents(auth) {
                         rule = ruleFromSessions(event.Sessions);
                         log.trace("RRULE: " + rule);
                     }
-                    // connect to Google calendar
-                    const calendar = google.calendar({
-                        version: 'v3',
-                        auth
-                    });
 
                     // new or existing gCal event?
                     var eventName = util.format("%s (%d)", event.Name, eventId);
@@ -260,6 +265,21 @@ function exportEvents(auth) {
                     log.trace(msg);
                 }
             } // end for
+
+            // handle deleted events
+            var gCalEvents = listEvents(calendar);
+            if (gCalEvents.length > 0) {
+                async.eachOfSeries(gCalEvents, purgeDeletedEvent, function(err) {
+                    if (err) {
+                        //throw err;    // continue even if one update fails.
+                        log.error(err);
+                    } else {
+                        log.trace("Events deleted: %d", eventsDeleted.length);
+                    }
+                });
+            }
+
+            // e-mail summary
             if ((eventsAdded.length + eventsUpdated.length + errors) > 0) {
                 var htmlMsg = util.format("<p>%d event%s created and %d event%s updated with %d error%s</p>",
                     eventsAdded.length, (eventsAdded.length === 1 ? "" : "s"),
@@ -330,6 +350,38 @@ function exportEvents(auth) {
     });
 }
 
+function purgeDeletedEvent(event, index, callback) {
+    log.trace("%d >>> Processing event %s", index + 1, event.summary);
+    try {
+        eventId = event.summary.match(/.*(\d{7})/)[0];
+        var eventArgs = {
+            path: {
+                accountId: config.accountId,
+                eventId: eventId
+            }
+        };
+
+        apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
+            if (_.isNil(eventData) || _.isNil(eventData.Id)) {
+                // event was deleted from WildApricot -- delete from Google
+                log.trace("Event %s was deleted from WildApricot -- deleting from Google");
+                eventsDeleted.push(eventId);
+                setTimeout(function() {
+                    callback();
+                }, 1000);
+            } else {
+                // nothing to do
+                callback();
+            }
+        });
+    } catch (ex) {
+        log.error(ex);
+        setTimeout(function() {
+            callback();
+        }, 1000);
+    }
+}
+
 Date.dateDiff = function(datepart, fromdate, todate) {
     datepart = datepart.toLowerCase();
     var diff = todate - fromdate;
@@ -388,6 +440,24 @@ function findEvent(calendar, eventId) {
     });
     while (null == results) {deasync.sleep(100);}
     return results[0];
+}
+
+function listEvents(calendar) {
+    var results = null;
+    var startDate = (new Date()).toISOString();
+    calendar.events.list({
+        calendarId: gCalId,
+        timeMin: startDate
+    }, (err, res) => {
+        if (err) return log.error('gCalendar API returned an error: ' + err);
+        results = res.data.items;
+        if (results.length < 1) {
+            const msg = util.format("No events found for time period %s - today", startDate);
+            return log.warn(msg);
+        }
+    });
+    while (null == results) {deasync.sleep(100);}
+    return results;
 }
 
 function eventCreateHandler(err, event) {
