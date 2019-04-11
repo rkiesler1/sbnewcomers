@@ -364,6 +364,7 @@ function purgeDeletedEvent(event, index, callback) {
 
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
             log.trace(eventData);
+            log.trace(eventResp);
             if (_.isNil(eventData) || _.isNil(eventData.Id)) {
                 // event was deleted from WildApricot -- delete from Google
                 log.trace("Event %s was deleted from WildApricot -- deleting from Google", event.summary);
