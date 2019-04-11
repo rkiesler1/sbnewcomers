@@ -270,6 +270,7 @@ function exportEvents(auth) {
             var gCalEvents = listEvents(calendar);
             if (gCalEvents.length > 0) {
                 log.info("Checking %d events for deletion", gCalEvents.length);
+                purgeDeletedEvent.bind(auth);
                 async.eachOfSeries(gCalEvents, purgeDeletedEvent, function(err) {
                     if (err) {
                         //throw err;    // continue even if one update fails.
