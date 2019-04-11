@@ -363,9 +363,7 @@ function purgeDeletedEvent(event, index, callback) {
         };
 
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
-            log.trace(eventData);
-            log.trace(eventResp);
-            if (_.isNil(eventData) || _.isNil(eventData.Id)) {
+            if (eventResp.statusCode == 404) {
                 // event was deleted from WildApricot -- delete from Google
                 log.trace("Event %s was deleted from WildApricot -- deleting from Google", event.summary);
                 eventsDeleted.push(eventId);
@@ -374,7 +372,9 @@ function purgeDeletedEvent(event, index, callback) {
                 }, 1000);
             } else {
                 // nothing to do
-                callback();
+                setTimeout(function() {
+                    callback();
+                }, 1000);
             }
         });
     } catch (ex) {
