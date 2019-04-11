@@ -165,7 +165,7 @@ function exportEvents(auth) {
                 version: 'v3',
                 auth
             });
-
+/*
             for (var i = 0; i < events.length; i++) {
                 var event = events[i];
                 eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
@@ -265,7 +265,7 @@ function exportEvents(auth) {
                     log.trace(msg);
                 }
             } // end for
-
+*/
             // handle deleted events
             var gCalEvents = listEvents(calendar);
             if (gCalEvents.length > 0) {
@@ -374,7 +374,7 @@ function purgeDeletedEvent(event, index, callback) {
                 // event was deleted from WildApricot -- delete from Google
                 log.trace("%d: Event %s was deleted from WildApricot -- deleting from Google",
                     eventResp.statusCode, event.summary);
-                eventsDeleted.push(eventId);
+                //eventsDeleted.push(eventId);
                 calendar.events.delete({
                     auth: auth,
                     calendarId: gCalId,
@@ -502,8 +502,8 @@ function eventDeleteHandler(err, event) {
         log.error('Error deleting event from the calendar: ' + err);
         return;
     }
-    eventsUpdated.push(event.data.summary);
-    log.info('Event updated: %s', event.data.summary);
+    eventsDeleted.push(event.data.summary);
+    log.info('Event deleted: %s', event.data.summary);
 }
 
 /*****************
