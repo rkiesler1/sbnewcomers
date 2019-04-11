@@ -270,8 +270,7 @@ function exportEvents(auth) {
             var gCalEvents = listEvents(calendar);
             if (gCalEvents.length > 0) {
                 log.info("Checking %d events for deletion", gCalEvents.length);
-                purgeDeletedEvent.bind(auth);
-                async.eachOfSeries(gCalEvents, purgeDeletedEvent, function(err) {
+                async.eachOfSeries(gCalEvents, purgeDeletedEvent.bind(auth), function(err) {
                     if (err) {
                         //throw err;    // continue even if one update fails.
                         log.error(err);
@@ -352,7 +351,7 @@ function exportEvents(auth) {
     });
 }
 
-function purgeDeletedEvent(auth, event, index, callback) {
+function purgeDeletedEvent(event, index, callback) {
     log.trace("%d >>> Processing event %s", index + 1, event.summary);
     try {
         // connect to Google calendar
@@ -369,6 +368,7 @@ function purgeDeletedEvent(auth, event, index, callback) {
             }
         };
 
+        var auth = this;
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
             if (eventResp.statusCode == 404) {
                 // event was deleted from WildApricot -- delete from Google
