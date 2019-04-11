@@ -352,7 +352,7 @@ function exportEvents(auth) {
     });
 }
 
-function purgeDeletedEvent(event, index, callback) {
+function purgeDeletedEvent(auth, event, index, callback) {
     log.trace("%d >>> Processing event %s", index + 1, event.summary);
     try {
         // connect to Google calendar
