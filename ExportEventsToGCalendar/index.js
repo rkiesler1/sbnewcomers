@@ -365,8 +365,14 @@ function purgeDeletedEvent(event, index, callback) {
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
             if (eventResp.statusCode == 404) {
                 // event was deleted from WildApricot -- delete from Google
-                log.trace("Event %s was deleted from WildApricot -- deleting from Google", event.summary);
+                log.trace("%d: Event %s was deleted from WildApricot -- deleting from Google",
+                    eventResp.statusCode, event.summary);
                 eventsDeleted.push(eventId);
+                calendar.events.delete({
+                    auth: auth,
+                    calendarId: gCalId,
+                    eventId: event.id
+                }, eventDeleteHandler);
                 setTimeout(function() {
                     callback();
                 }, 1000);
@@ -477,6 +483,16 @@ function eventUpdateHandler(err, event) {
     if (err) {
         errors++;
         log.error('Error updating the calendar: ' + err);
+        return;
+    }
+    eventsUpdated.push(event.data.summary);
+    log.info('Event updated: %s', event.data.summary);
+}
+
+function eventDeleteHandler(err, event) {
+    if (err) {
+        errors++;
+        log.error('Error deleting event from the calendar: ' + err);
         return;
     }
     eventsUpdated.push(event.data.summary);
