@@ -354,6 +354,12 @@ function exportEvents(auth) {
 function purgeDeletedEvent(event, index, callback) {
     log.trace("%d >>> Processing event %s", index + 1, event.summary);
     try {
+        // connect to Google calendar
+        const calendar = google.calendar({
+            version: 'v3',
+            auth
+        });
+
         eventId = event.summary.match(/.*(\d{7})/)[0];
         var eventArgs = {
             path: {
