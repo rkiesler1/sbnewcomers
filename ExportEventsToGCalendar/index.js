@@ -35,7 +35,7 @@ var log = bunyan.createLogger({
     streams: [
         {
             stream: process.stderr,
-            level: 'info'
+            level: 'trace'
         },
         {
             stream: new RotatingFileStream({
@@ -362,9 +362,10 @@ function purgeDeletedEvent(event, index, callback) {
         };
 
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
+            log.trace(eventData);
             if (_.isNil(eventData) || _.isNil(eventData.Id)) {
                 // event was deleted from WildApricot -- delete from Google
-                log.trace("Event %s was deleted from WildApricot -- deleting from Google");
+                log.trace("Event %s was deleted from WildApricot -- deleting from Google", event.summary);
                 eventsDeleted.push(eventId);
                 setTimeout(function() {
                     callback();
