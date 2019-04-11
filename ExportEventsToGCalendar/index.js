@@ -165,7 +165,7 @@ function exportEvents(auth) {
                 version: 'v3',
                 auth
             });
-/*
+
             for (var i = 0; i < events.length; i++) {
                 var event = events[i];
                 eventId = event.Url.substring(event.Url.lastIndexOf("/") + 1);
@@ -265,7 +265,7 @@ function exportEvents(auth) {
                     log.trace(msg);
                 }
             } // end for
-*/
+
             // handle deleted events
             var gCalEvents = listEvents(calendar);
             if (gCalEvents.length > 0) {
