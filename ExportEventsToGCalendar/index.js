@@ -282,9 +282,10 @@ function exportEvents(auth) {
 
             // e-mail summary
             if ((eventsAdded.length + eventsUpdated.length + errors) > 0) {
-                var htmlMsg = util.format("<p>%d event%s created and %d event%s updated with %d error%s</p>",
+                var htmlMsg = util.format("<p>%d event%s created, %d event%s updated, and %d event%s deleted with %d error%s</p>",
                     eventsAdded.length, (eventsAdded.length === 1 ? "" : "s"),
                     eventsUpdated.length, (eventsUpdated.length === 1 ? "" : "s"),
+                    eventsDeleted.length, (eventsDeleted.length === 1 ? "" : "s"),
                     errors, (errors === 1 ? "" : "s")) + "<ul>";
                 for (var li = 0; li < eventsAdded.length; li++) {
                     htmlMsg += util.format("<li>Added: %s</li>", eventsAdded[li]);
@@ -294,9 +295,10 @@ function exportEvents(auth) {
                 }
                 htmlMsg += "</ul>";
 
-                var textMsg = util.format("%d event%s created and %d event%s updated with %d error%s",
+                var textMsg = util.format("%d event%s created, %d event%s updated, and %d event%s deleted with %d error%s",
                     eventsAdded.length, (eventsAdded.length === 1 ? "" : "s"),
                     eventsUpdated.length, (eventsUpdated.length === 1 ? "" : "s"),
+                    eventsDeleted.length, (eventsDeleted.length === 1 ? "" : "s"),
                     errors, (errors === 1 ? "" : "s"));
 
                 // Create sendEmail params
