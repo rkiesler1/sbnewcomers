@@ -374,8 +374,8 @@ function purgeDeletedEvent(event, index, callback) {
         apiClient.methods.listEvent(eventArgs, function(eventData, eventResp) {
             if (eventResp.statusCode == 404) {
                 // event was deleted from WildApricot -- delete from Google
-                log.trace("%d: Event %s was deleted from WildApricot -- deleting from Google",
-                    eventResp.statusCode, event.summary);
+                log.trace("%d - %s: Event %s was deleted from WildApricot -- deleting from Google",
+                    eventResp.statusCode, eventResp.statusMessage, event.summary);
                 //eventsDeleted.push(eventId);
                 calendar.events.delete({
                     auth: auth,
