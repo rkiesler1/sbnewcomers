@@ -64,7 +64,7 @@ var apiClient = wildapricot.init({
 function getContacts(args, action) {
     const interval = 10000;
 
-    // send the newbie query to the API
+    // send the FoN query to the API
     apiClient.methods.listContacts(args, function(contactData, response) {
         if (!_.isNil(contactData) && !_.isNil(contactData.State)) {
             // good response
