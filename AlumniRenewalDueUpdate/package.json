@@ -1,0 +1,20 @@
+{
+    "name": "friendsofnewcomersupdate",
+    "version": "1.0.0",
+    "description": "Update renewal date for FoNs whenever they register for an event to avoid archiving",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Roy Kiesler",
+    "license": "ISC",
+    "dependencies": {
+        "async": "^2.6.2",
+        "aws-sdk": "^2.313.0",
+        "bunyan": "^1.8.12",
+        "bunyan-rotating-file-stream": "^1.6.3",
+        "dotenv": "^6.0.0",
+        "lodash": "^4.17.11",
+        "path": "^0.12.7"
+    }
+}

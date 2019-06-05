@@ -69,3 +69,5 @@ aws.rkiesler.json
 
 # OSX
 .DS_Store
+
+.metals/
