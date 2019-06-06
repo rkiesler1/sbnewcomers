@@ -279,20 +279,20 @@ const processContacts = function(alumni, action) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                                Data: util.format("%s processed for %d alum%s with %d updated, %d skipped, and %d error%s",
+                                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                                Data: util.format("%s processed for %d alum%s with %d updated, %d skipped, and %d error%s",
+                                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             }
                         },
                         Subject: {
                             Charset: 'UTF-8',
-                            Data: 'Renewal Date Database Update'
+                            Data: 'Alumni Renewal Date Database Update'
                         }
                     },
                     Source: emailFrom,
@@ -303,8 +303,8 @@ const processContacts = function(alumni, action) {
 
                 // Create the promise and SES service object
                 var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-                log.info("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                log.info("%s processed for %d alum%s with %d updated, %d skipped, and %d error%s",
+                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                     updated, skipped, errors, (errors == 1 ? "" : "s"));
 
                 // Handle promise's fulfilled/rejected states
