@@ -292,20 +292,20 @@ const processContacts = function(fons, action) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                                Data: util.format("<p>Renewal date processed for %d alum%s who recently registered for an open event:</p><ul><li>%d updated</li><li>%d skipped</li><li>%d error%s</li>",
+                                    processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                                Data: util.format("Renewal date processed for %d alum%s who recently registered for an open event:\n%d updated\n%d skipped\n%d error%s",
+                                    processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             }
                         },
                         Subject: {
                             Charset: 'UTF-8',
-                            Data: 'Renewal Date Database Update'
+                            Data: 'Renewal Date Database Update for Existing Alumni'
                         }
                     },
                     Source: emailFrom,
@@ -316,8 +316,8 @@ const processContacts = function(fons, action) {
 
                 // Create the promise and SES service object
                 var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-                log.info("%s processed for %d member%s with %d updated, %d skipped, and %d error%s",
-                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
+                log.info("Renewal date processed for %d alum%s who recently registered for an open event with %d updated, %d skipped, and %d error%s",
+                    processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                     updated, skipped, errors, (errors == 1 ? "" : "s"));
 
                 // Handle promise's fulfilled/rejected states
