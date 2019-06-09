@@ -292,13 +292,13 @@ const processContacts = function(fons, action) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("<p>Renewal date processed for %d alum%s who recently registered for an open event:</p><ul><li>%d updated</li><li>%d skipped</li><li>%d error%s</li>",
+                                Data: util.format("<p>Renewal date checked for %d alum%s who registered for an open event:</p><ul><li>%d updated</li><li>%d skipped</li><li>%d error%s</li>",
                                     processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("Renewal date processed for %d alum%s who recently registered for an open event:\n%d updated\n%d skipped\n%d error%s",
+                                Data: util.format("Renewal date checked for %d alum%s who registered for an open event:\n%d updated\n%d skipped\n%d error%s",
                                     processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             }
