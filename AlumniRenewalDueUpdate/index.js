@@ -170,7 +170,7 @@ const processContact = function(contact, index, callback) {
                     {
                         "FieldName": "Renewal due",
                         "SystemCode": contact.renewalDateSysCode,
-                        "Value": renewalDate
+                        "Value": formatDate(new Date(renewalDate))
                     }
                 ]
             }
@@ -190,13 +190,13 @@ const processContact = function(contact, index, callback) {
                 }, 1000);
             } else {
                 errors++;
-                const msg = util.format("%d >>> Failed to %s alumni renewal date for %s %s (contact ID %s)",
-                    index + 1, contact.action.substring(0, contact.action.indexOf('RenewalDate' + 1)),
-                    contactDataUpd.FirstName, contactDataUpd.LastName, contactDataUpd.Id);
+                const msg = util.format("%d >>> Failed to update alumni renewal date for %s %s (contact ID %s) -- %s (%s)",
+                    index + 1, contact.firstName, contact.lastName, contact.id,
+                    response.statusMessage, response.statusCode);
                 log.error(msg);
                 setTimeout(function() {
                     callback();
-                }, 500);
+                }, 1000);
             }
         });
     }
@@ -291,8 +291,9 @@ const processContacts = function(alumni, action) {
                             }
                         },
                         Subject: {
-                            Charset: 'UTF-8',
-                            Data: 'Alumni Renewal Date Database Update'
+                            Charset: "UTF-8",
+                            Data: util.format("%sAlumni Renewal Date Database Update",
+                                errors > 0 ? "*** ERRORS: " : "")
                         }
                     },
                     Source: emailFrom,
@@ -357,8 +358,8 @@ const alumniArgs = {
     path: { accountId: config.accountId },
     parameters: {
         $select: "'First name','Last name','Renewal due','Membership status','Membership enabled','Level last changed'",
-        //$filter: "'Membership level ID' eq '694456' " +      // Alumni in prod
-        $filter: "'Membership level ID' eq '1041388' " +      // Alumni in sandbox
+        $filter: "'Membership level ID' eq '694456' " +      // Alumni in prod
+        //$filter: "'Membership level ID' eq '1041388' " +      // Alumni in sandbox
         "AND 'Profile last updated' ge '" + yesterday + "'"
     }
 };
