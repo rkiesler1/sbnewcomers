@@ -149,7 +149,9 @@ const processContact = function(contact, index, callback) {
     log.trace("%d >>> Current renewal for %s %s (contact ID: %s) is %s", index + 1,
         contact.firstName, contact.lastName, contact.id, formatDate(new Date(contact.renewalDate)));
 
-    if (renewalDate.getFullYear() > now.getFullYear()) {
+    if (renewalDate.getFullYear() > now.getFullYear() &&
+        renewalDate.getMonth() > now.getMonth()) {
+        // this should not happen again after changing the initial query filter
         log.trace("%d >>> Renewal date for %s %s (contact ID: %s) already set to %s", updated,
             contact.firstName, contact.lastName, contact.id, formatDate(new Date(renewalDate)));
         skipped++;
@@ -348,8 +350,10 @@ function formatDate(d) {
 
 var today = new Date().toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
 var now = new Date();
-now.setDate(now.getDate() - 1);
+now.setDate(now.getDate() - 1); // 1
 var yesterday = now.toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
+//var yesterday = "2019-06-18";
+console.log("yesterday = " + yesterday);
 
 /*******************************
  * set query filter parameters *
@@ -360,7 +364,8 @@ const alumniArgs = {
         $select: "'First name','Last name','Renewal due','Membership status','Membership enabled','Level last changed'",
         $filter: "'Membership level ID' eq '694456' " +      // Alumni in prod
         //$filter: "'Membership level ID' eq '1041388' " +      // Alumni in sandbox
-        "AND 'Profile last updated' ge '" + yesterday + "'"
+        "AND 'Renewal due' le '" + yesterday + "'"
+        //"AND 'Profile last updated' ge '" + yesterday + "'"
     }
 };
 
