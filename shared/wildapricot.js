@@ -123,6 +123,9 @@ function registerClientMethods() {
     // Invoice: https://api.wildapricot.org/v2.1/accounts/:accountId/Invoices/:invoiceId",
     client.registerMethod('listInvoice', baseURL + '/accounts/${accountId}/Invoices/${invoiceId}', 'GET');
 
+    // Membership levels: Invoice: https://api.wildapricot.org/v2.1/accounts/:accountId/MembershipLevels",
+    client.registerMethod('listMembershipLevels', baseURL + '/accounts/${accountId}/MembershipLevels', 'GET');
+
     wrapMethods();
 }
 

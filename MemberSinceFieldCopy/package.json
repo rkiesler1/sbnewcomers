@@ -9,8 +9,8 @@
   "author": "Roy Kiesler",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.6.1",
-    "aws-sdk": "^2.326.0",
+    "async": "^2.6.3",
+    "aws-sdk": "^2.656.0",
     "bunyan": "^1.8.12",
     "bunyan-rotating-file-stream": "^1.6.3",
     "lodash": "~4.17.13"

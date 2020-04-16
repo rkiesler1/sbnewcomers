@@ -7,16 +7,16 @@
     "debug": "node --nolazy --inspect-brk=9229 ./bin/www"
   },
   "dependencies": {
-    "@types/cors": "^2.8.4",
+    "@types/cors": "^2.8.6",
     "bunyan": "^1.8.12",
     "bunyan-rotating-file-stream": "^1.6.3",
-    "cookie-parser": "~1.4.3",
+    "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.0",
-    "hbs": "~4.0.4",
+    "hbs": "^4.1.1",
     "http-errors": "~1.6.2",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.15",
     "morgan": "~1.9.0"
   }
 }
