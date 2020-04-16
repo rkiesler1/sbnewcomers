@@ -250,7 +250,7 @@ function exportEvents(auth) {
                                 end.setDate(start.getDate());
                                 end.setMonth(start.getMonth());
                                 end.setFullYear(start.getFullYear());
-                                gEvent.end.dateTime = end.toISOString();
+                                gEvent.end.dateTime = gEvent.start.dateTime;//end.toISOString();
                             }
                         }
 
