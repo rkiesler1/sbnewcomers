@@ -204,15 +204,6 @@ const processContact = function(contact, index, callback) {
     }
 };
 
-const compareEventRegDates = function(regA, regB) {
-    var dateA = new Date(regA.RegistrationDate);
-    var dateB = new Date(regB.RegistrationDate);
-    if (dateA > dateB) return 1;
-    if (dateB > dateA) return -1;
-
-    return 0;
-};
-
 /*************************
  * Process member records *
  *************************/
