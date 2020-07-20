@@ -13,6 +13,6 @@
     "aws-sdk": "^2.656.0",
     "bunyan": "^1.8.12",
     "bunyan-rotating-file-stream": "^1.6.3",
-    "lodash": "~4.17.13"
+    "lodash": "~4.17.19"
   }
 }
