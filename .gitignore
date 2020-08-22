@@ -60,6 +60,7 @@ typings/
 # dotenv environment variables file
 .env
 .env.test
+.env.prod
 
 # AWS credentials
 aws.json
@@ -72,3 +73,4 @@ aws.rkiesler.json
 .DS_Store
 
 .metals/
+shared/.env.prod

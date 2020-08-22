@@ -141,8 +141,8 @@ const processContact = function(contact, index, callback) {
     processed++;
 
     // Update membership level
-    log.trace("%d >>> Updating membership level to 'Regular' for %s %s (contact ID: %s)",
-        updated, contact.firstName, contact.lastName, contact.id);
+    log.trace("%d >>> Updating membership level to '%s' for %s %s (contact ID: %s)",
+        updated, contact.membershipLevel, contact.firstName, contact.lastName, contact.id);
 
     const levelUpdateArgs = {
         path: { accountId: config.accountId, contactId: contact.id.toString() },
@@ -209,8 +209,8 @@ const processContacts = function(newbies, action) {
             case "newbieToNewcomerUpdate":
                 newbieRecords.push({
                     action: action,
-                    membershipLevel: 'Regular', // TODO: lookup id?
-                    membershipLevelId: lookupMembershipLevel('Regular'),
+                    membershipLevel: 'NewcomerMember', // TODO: lookup id?
+                    membershipLevelId: lookupMembershipLevel('NewcomerMember'),
                     membershipStatusSysCode: newbie.FieldValues.filter(function(field) {
                         return field.FieldName == 'Membership status';
                     })[0].SystemCode,
@@ -244,19 +244,19 @@ const processContacts = function(newbies, action) {
                             Html: {
                                 Charset: "UTF-8",
                                 Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
+                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             },
                             Text: {
                                 Charset: "UTF-8",
                                 Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s",
-                                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
+                                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
                                     updated, skipped, errors, (errors == 1 ? "" : "s"))
                             }
                         },
                         Subject: {
                             Charset: "UTF-8",
-                            Data: util.format("%sNewbie to Regular update",
+                            Data: util.format("%sNewbie to Newcomer update",
                                 errors > 0 ? "*** ERRORS: " : "")
                         }
                     },
@@ -269,7 +269,7 @@ const processContacts = function(newbies, action) {
                 // Create the promise and SES service object
                 var sendPromise = new aws.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
                 log.info("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s",
-                    action, processed, (processed > 1 ? "ni" : (processed == 1 ? "" : "ni")),
+                    action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
                     updated, skipped, errors, (errors == 1 ? "" : "s"));
 
                 // Handle promise's fulfilled/rejected states
@@ -301,10 +301,10 @@ process.on('uncaughtException', (err) => {
 /*******************************
  * set query filter parameters *
  *******************************/
-var now = new Date();
-now.setDate(now.getDate() - 90);
-var todayMinus90 = now.toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
-console.log("Today - 90 days: " + todayMinus90);
+var today = new Date();
+today.setDate(today.getDate() + 641);
+var todayPlus640 = today.toISOString().substring(0, 10);    // keep the yyyy-mm-dd portion
+console.log("Today + 640 days: " + todayPlus640);
 
 /****************************
  * Membership levels lookup *
@@ -339,10 +339,10 @@ apiClient.methods.listMembershipLevels(args, function(levelData, response) {
             const newbieArgs = {
                 path: { accountId: config.accountId },
                 parameters: {
-                    $select: "'First name','Last name','Membership status','Membership enabled','Member since'",
+                    $select: "'First name','Last name','Membership status','Membership enabled','Member since', 'Renewal due",
                     $filter: "'Membership status' eq 'Active'" +
-                             " AND 'Membership level ID' eq " + lookupMembershipLevel('Newbie') +
-                             " AND 'Member since' lt '" + todayMinus90 + "'"
+                             " AND 'Membership level ID' eq " + lookupMembershipLevel('NewbieNewcomer') +
+                             " AND 'Renewal due' le '" + todayPlus640 + "'"
                 }
             };
             getContacts(newbieArgs, 'newbieToNewcomerUpdate');
