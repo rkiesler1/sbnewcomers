@@ -11,8 +11,8 @@ const wildapricot = require(path.join(__dirname, '..', 'shared/wildapricot.js'))
 console.log(config);
 
 // configure mail
-//const emailTo = "HelpDesk@sbnewcomers.org";
-const emailTo = "rkiesler@gmail.com";
+const emailTo = "HelpDesk@sbnewcomers.org";
+//const emailTo = "rkiesler@gmail.com";
 const emailFrom = "HelpDesk@sbnewcomers.org";
 
 // configure logging
