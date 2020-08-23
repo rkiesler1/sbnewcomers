@@ -222,15 +222,20 @@ const processContacts = function(newbies, action) {
     }
 
     if (newbieRecords.length > 0) {
-        newbieRecords.map(record => {
-            console.log(util.format("%s %s (%d)", record.firstName, record.lastName, record.id));
-        });
         async.eachOfSeries(newbieRecords, processContact, function(err) {
             if (err) {
                 //throw err;    // continue even if one update fails.
                 log.error(err);
             } else {
                 // Create sendEmail params
+                var listText, contact = "";
+                var listHtml = "<ul>";
+                newbieRecords.map(record => {
+                    contact = util.format("%s %s (%d)", record.firstName, record.lastName, record.id);
+                    listText += ("\n" + contact);
+                    listHtml += ("<li>" + contact + "</li>");
+                });
+        
                 var params = {
                     Destination: {
                         ToAddresses: [
@@ -241,15 +246,15 @@ const processContacts = function(newbies, action) {
                         Body: {
                             Html: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s",
+                                Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s %s",
                                     action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
-                                    updated, skipped, errors, (errors == 1 ? "" : "s"))
+                                    updated, skipped, errors, (errors == 1 ? "" : "s"), listHtml)
                             },
                             Text: {
                                 Charset: "UTF-8",
-                                Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s",
+                                Data: util.format("%s processed for %d newbie%s with %d updated, %d skipped, and %d error%s\n%s",
                                     action, processed, (processed > 1 ? "s" : (processed == 1 ? "" : "s")),
-                                    updated, skipped, errors, (errors == 1 ? "" : "s"))
+                                    updated, skipped, errors, (errors == 1 ? "" : "s"), listText)
                             }
                         },
                         Subject: {
