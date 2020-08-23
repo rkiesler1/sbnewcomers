@@ -84,7 +84,7 @@ function getContacts(args, action) {
                     // process results
                     if (!_.isNil(contactData.Contacts)) {
                         if (_.isArray(contactData.Contacts)) {
-                            log.trace("%d contacts retrieved",
+                            log.trace("%s contacts retrieved",
                                 contactData.Contacts.length > 0 ?
                                 contactData.Contacts.length : "No");
                         }
@@ -117,11 +117,6 @@ function getContacts(args, action) {
             }
         }
         return 1;
-    });
-
-    contactReq.on('requestTimeout', function (req) {
-        console.log("apiClient.methods.listContacts request has expired");
-        req.abort();
     });
 }
 
@@ -227,6 +222,9 @@ const processContacts = function(newbies, action) {
     }
 
     if (newbieRecords.length > 0) {
+        newbieRecords.map(record => {
+            console.log(util.format("%s %s (%d)", record.firstName, record.lastName, record.id));
+        });
         async.eachOfSeries(newbieRecords, processContact, function(err) {
             if (err) {
                 //throw err;    // continue even if one update fails.
