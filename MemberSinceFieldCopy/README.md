@@ -1,5 +1,8 @@
 # Member Since Field Copy
 
+><span style="color:#e1341e">Member Since Field Copy is deprectaed</span><br>
+This script is now deprecated due to the change in how membership levels are handled.
+
 A Node.js script that uses the WildApricot API to copy the `Member since` system field value to a custom read-only that can be used for display purposes in member list reports.
 
 ## Linux Setup
