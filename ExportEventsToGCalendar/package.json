@@ -15,7 +15,7 @@
     "bunyan": "^1.8.12",
     "bunyan-rotating-file-stream": "^1.6.3",
     "deasync": "^0.1.19",
-    "googleapis": "^27.0.0",
+    "googleapis": "^39.2.0",
     "lodash": "^4.17.15"
   }
 }
