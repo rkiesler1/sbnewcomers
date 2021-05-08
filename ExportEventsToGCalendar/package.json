@@ -10,12 +10,12 @@
   "license": "ISC",
   "dependencies": {
     "async": "^2.6.3",
-    "aws-sdk": "^2.656.0",
+    "aws-sdk": "^2.903.0",
     "axios": "^0.19.2",
-    "bunyan": "^1.8.12",
+    "bunyan": "^1.8.15",
     "bunyan-rotating-file-stream": "^1.6.3",
-    "deasync": "^0.1.19",
+    "deasync": "^0.1.21",
     "googleapis": "^39.2.0",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.21"
   }
 }
