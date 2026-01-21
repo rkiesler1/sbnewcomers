@@ -14,7 +14,7 @@
     "bunyan": "^1.8.12",
     "bunyan-rotating-file-stream": "^2.0.3",
     "dotenv": "^6.2.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "path": "^0.12.7"
   }
 }
